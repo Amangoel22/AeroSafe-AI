@@ -7,7 +7,7 @@ from app.models.users import User
 from app.schemas.auth import UserRegisterRequest, UserLoginRequest
 from app.utils.security import hash_password, verify_password, decode_access_token
 from app.utils.logger import logger
-from app.config.config import get_db
+from app.config.database import get_db
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login", auto_error=False)
 

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, File, Uplo
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
-from app.config.config import get_db
+from app.config.database import get_db
 from app.schemas.complaint import ComplaintResponse, ComplaintCreateRequest, ComplaintUpdateRequest
 from app.services.complaint_service import (
     get_complaints,

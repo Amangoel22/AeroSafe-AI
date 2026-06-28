@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
-from app.config.config import get_db
+from app.config.database import get_db
 from app.schemas.analytics import MonthlyStatsResponse, TrendResponse
 from app.services.analytics_service import get_monthly_stats, get_resolution_trends
 from app.services.auth_service import get_current_user

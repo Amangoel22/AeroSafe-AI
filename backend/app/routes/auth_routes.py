@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.config.config import get_db
+from app.config.database import get_db
 from app.schemas.auth import (
     UserRegisterRequest,
     UserLoginRequest,

@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from app.config.config import test_connection, show_tables
+from app.config.database import test_connection, show_tables
 from app.routes.auth_routes import router as auth_router
 from app.routes.complaint_routes import router as complaint_router
 from app.routes.analytics_routes import router as analytics_router
