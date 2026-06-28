@@ -1,0 +1,91 @@
+from pydantic import BaseModel, field_validator
+from typing import Optional, Literal
+from datetime import datetime, timezone, timedelta
+
+IST = timezone(timedelta(hours=5, minutes=30))
+
+class IncidentStatusResponse(BaseModel):
+    id: int
+    incident_id: int
+    camera_location: str
+    severity: Literal['Low', 'Medium', 'High', 'Critical']
+    status: Literal['Pending', 'In Progress', 'Resolved']
+    camera_no: Optional[str] = None
+    reported_at: datetime
+    resolution_time: Optional[datetime] = None
+    assigned_to: Optional[int] = None
+    created_at: datetime
+    updated_at: datetime
+
+    @field_validator("reported_at", "resolution_time", "created_at", "updated_at", mode="before")
+    def convert_to_ist(cls, v):
+        if isinstance(v, datetime):
+            if v.tzinfo is None:
+                v = v.replace(tzinfo=IST)
+            return v
+        return v
+
+    class Config:
+        from_attributes = True
+
+class ComplaintResponse(BaseModel):
+    id: int
+    location: str
+    issue_type: str
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+    created_at: datetime
+    is_active: bool
+    status: Optional[IncidentStatusResponse] = None
+
+    @field_validator("created_at", mode="before")
+    def convert_to_ist(cls, v):
+        if isinstance(v, datetime):
+            if v.tzinfo is None:
+                v = v.replace(tzinfo=IST)
+            return v
+        return v
+
+    @field_validator("image_url", mode="before")
+    def convert_to_presigned(cls, v):
+        if v:
+            from app.utils.security import generate_presigned_url
+            return generate_presigned_url(v)
+        return v
+
+    class Config:
+        from_attributes = True
+
+class ComplaintCreateRequest(BaseModel):
+    # Incident fields
+    location: str
+    issue_type: str
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+    is_active: Optional[bool] = True
+
+    # IncidentStatus fields
+    camera_location: Optional[str] = None
+    severity: Optional[Literal['Low', 'Medium', 'High', 'Critical']] = 'Low'
+    status: Optional[Literal['Pending', 'In Progress', 'Resolved']] = 'Pending'
+    camera_no: Optional[str] = None
+    reported_at: Optional[datetime] = None
+    resolution_time: Optional[datetime] = None
+    assigned_to: Optional[int] = None
+
+class ComplaintUpdateRequest(BaseModel):
+    # Incident fields
+    location: Optional[str] = None
+    issue_type: Optional[str] = None
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+    is_active: Optional[bool] = None
+
+    # IncidentStatus fields
+    camera_location: Optional[str] = None
+    severity: Optional[Literal['Low', 'Medium', 'High', 'Critical']] = None
+    status: Optional[Literal['Pending', 'In Progress', 'Resolved']] = None
+    camera_no: Optional[str] = None
+    reported_at: Optional[datetime] = None
+    resolution_time: Optional[datetime] = None
+    assigned_to: Optional[int] = None
