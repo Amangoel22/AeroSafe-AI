@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.so
 
+<<<<<<< HEAD
 # Virtual Environments
 .env
 .env.*
@@ -10,6 +11,26 @@ __pycache__/
 venv/
 env/
 ENV/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+>>>>>>> abb6bf6 (Update .gitignore)
 
 # Python Cache & Testing
 .pytest_cache/
