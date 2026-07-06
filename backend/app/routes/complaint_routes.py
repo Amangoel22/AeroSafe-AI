@@ -15,7 +15,7 @@ from app.services.complaint_service import (
     update_complaint,
     deactivate_complaint
 )
-from app.services.auth_service import get_current_user
+from app.services.auth_service import get_current_user, get_current_user_or_service
 from app.models.users import User
 from app.utils.logger import logger
 from app.utils.security import verify_presigned_url
@@ -131,7 +131,7 @@ async def add_complaint(
     assigned_to: Optional[int] = Form(None),
     image: UploadFile = File(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_caller: User = Depends(get_current_user_or_service)
 ):
     try:
         image_url = await save_uploaded_file(image)

@@ -8,6 +8,7 @@ class Settings:
         self.JWT_SECRET = os.getenv("JWT_SECRET", "")
         self.JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
         self.ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+        self.AI_SERVICE_API_KEY = os.getenv("AI_SERVICE_API_KEY", "")
         
         # Database Credentials
         self.DB_USER = os.getenv("DB_USER")
