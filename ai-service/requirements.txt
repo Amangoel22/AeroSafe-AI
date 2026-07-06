@@ -1,6 +1,3 @@
-requirement.txt 
-
-
 ultralytics==8.4.87
 opencv-python
 requests
