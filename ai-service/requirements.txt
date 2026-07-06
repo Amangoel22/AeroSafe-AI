@@ -1,3 +1,6 @@
 ultralytics==8.4.87
 opencv-python
+
 requests
+
+python-dotenv

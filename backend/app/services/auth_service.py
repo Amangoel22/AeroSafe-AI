@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from fastapi import HTTPException, status, Depends
+from fastapi import HTTPException, status, Depends, Header
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime
 from app.models.users import User
@@ -200,4 +200,72 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
             detail="User account is inactive"
         )
         
+    return user
+
+
+from typing import Optional
+
+async def get_current_user_or_service(
+    x_api_key: Optional[str] = Header(None, alias="X-API-Key"),
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> Optional[User]:
+    """
+    Dual-auth dependency:
+      - If a valid X-API-Key header is provided (AI service), bypass user auth.
+      - Otherwise, fall back to standard JWT user auth.
+    Returns the User object for human callers, or None for the AI service.
+    """
+    from app.config.config import settings
+
+    # 1. AI service key check (takes priority over JWT)
+    if x_api_key:
+        if x_api_key == settings.AI_SERVICE_API_KEY:
+            logger.info("Request authenticated via AI service API key")
+            return None  # Signals: authenticated as AI service, not a human user
+        logger.warning("Authentication failed: Invalid X-API-Key provided")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid API key"
+        )
+
+    # 2. Fall back to standard JWT user auth
+    if not token:
+        logger.warning("Authentication failed: No token or API key provided")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+
+    payload = decode_access_token(token)
+    if not payload:
+        logger.warning("Authentication failed: Invalid or expired token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials / Token expired"
+        )
+
+    email: str = payload.get("sub")
+    if not email:
+        logger.warning("Authentication failed: Token payload missing 'sub' claim")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials"
+        )
+
+    user = await get_user_by_email(db, email)
+    if not user:
+        logger.warning(f"Authentication failed: User {email} not found")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found"
+        )
+
+    if not user.is_active:
+        logger.warning(f"Authentication failed: User {email} is inactive")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is inactive"
+        )
+
     return user
