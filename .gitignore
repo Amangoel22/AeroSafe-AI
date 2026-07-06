@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *.so
 
+# Model
+ai-service/best.pt
+
 <<<<<<< HEAD
 # Virtual Environments
 .env

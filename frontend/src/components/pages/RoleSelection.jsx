@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 
 const RoleSelection = () => {
   const navigate = useNavigate();
-  const { setRole } = useAuth();
+  const { switchRole } = useAuth();
 
   const roles = [
     {
@@ -40,7 +40,7 @@ const RoleSelection = () => {
   ];
 
   const handleSelectRole = (roleId) => {
-    setRole(roleId);
+    switchRole(roleId);
     navigate('/login');
   };
 
