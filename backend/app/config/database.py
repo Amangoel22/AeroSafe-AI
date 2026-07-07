@@ -57,7 +57,13 @@ async def test_connection():
 async def show_tables():
     try:
         async with engine.connect() as conn:    
-            result = await conn.execute(text("SHOW TABLES"))
+            result = await conn.execute(
+                text("""
+                    SELECT tablename
+                    FROM pg_tables
+                    WHERE schemaname = 'public';
+                """)
+)
             tables = [row[0] for row in result.fetchall()]
             logger.info("Tables in database:")
             for table in tables:
