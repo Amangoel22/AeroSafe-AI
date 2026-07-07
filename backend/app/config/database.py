@@ -48,8 +48,8 @@ async def db_session_maker():
 
 async def test_connection():
     try:
-        async with engine.begin() as conn:
-            await conn.run_sync(lambda conn: None)
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
         logger.info("Database connected")
     except SQLAlchemyError as e:
         logger.error(f"Database connection failed: {e}")

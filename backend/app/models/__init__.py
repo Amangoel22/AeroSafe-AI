@@ -1,11 +1,11 @@
-from .base import Base
-from .users import User
-from .incidents import Incident
-from .incident_status import IncidentStatus
+from app.models.base import Base
+from app.models.users import User
+from app.models.camera import Camera
+from app.models.incidents import Incident
 
 __all__ = [
     "Base",
     "User",
+    "Camera",
     "Incident",
-    "IncidentStatus"
 ]
