@@ -259,7 +259,7 @@ async def update_complaint(
         )
     
 
-async def deactivate_complaint(
+async def delete_complaint(
     db: AsyncSession,
     complaint_id: int,
 ):
@@ -268,7 +268,6 @@ async def deactivate_complaint(
         result = await db.execute(
             select(Incident).where(
                 Incident.id == complaint_id,
-                Incident.is_active == True,
             )
         )
 
@@ -280,18 +279,15 @@ async def deactivate_complaint(
                 detail="Complaint not found",
             )
 
-        complaint.is_active = False
-        complaint.updated_at = datetime.now()
-
+        await db.delete(complaint)
         await db.commit()
-        await db.refresh(complaint)
 
         logger.info(
-            f"Complaint {complaint.id} deactivated"
+        f"Complaint {complaint.id} deleted"
         )
 
         return {
-            "message": "Complaint deactivated successfully"
+            "message": "Complaint deleted successfully"
         }
 
     except HTTPException:

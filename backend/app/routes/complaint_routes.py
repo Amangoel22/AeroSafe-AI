@@ -13,7 +13,7 @@ from app.services.complaint_service import (
     get_complaint_by_id,
     create_complaint,
     update_complaint,
-    deactivate_complaint
+    delete_complaint
 )
 from app.services.auth_service import get_current_user, get_current_user_or_service
 from app.models.users import User
@@ -222,7 +222,7 @@ async def remove_complaint(
     # current_user: User = Depends(get_current_user) enable when jwt done
 ):
     try:
-        result = await deactivate_complaint(db, id)
+        result = await delete_complaint(db, id)
         return result
     except HTTPException as he:
         raise he
