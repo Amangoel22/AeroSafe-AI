@@ -30,19 +30,36 @@ class IncidentStatusResponse(BaseModel):
 
 class ComplaintResponse(BaseModel):
     id: int
+
+    camera_id: int
+    assigned_to: Optional[int] = None
+
     location: str
     issue_type: str
+
     image_url: Optional[str] = None
     description: Optional[str] = None
-    created_at: datetime
-    is_active: bool
+
+    severity: Literal[
+        "Low",
+        "Medium",
+        "High",
+        "Critical",
+    ]
+
     status: Literal[
-    "Pending",
-    "Assigned",
-    "In Progress",
-    "Resolved",
-    "False Alarm",
-]
+        "Pending",
+        "Assigned",
+        "In Progress",
+        "Resolved",
+        "False Alarm",
+    ]
+
+    created_at: datetime
+    reported_at: datetime
+    resolved_at: Optional[datetime] = None
+
+    is_active: bool
 
     @field_validator("created_at", mode="before")
     def convert_to_ist(cls, v):
@@ -52,11 +69,17 @@ class ComplaintResponse(BaseModel):
             return v
         return v
 
-    @field_validator("image_url", mode="before")
-    def convert_to_presigned(cls, v):
-        if v:
-            from app.utils.security import generate_presigned_url
-            return generate_presigned_url(v)
+    @field_validator(
+    "created_at",
+    "reported_at",
+    "resolved_at",
+    mode="before"
+)
+    def convert_to_ist(cls, v):
+        if isinstance(v, datetime):
+            if v.tzinfo is None:
+                v = v.replace(tzinfo=IST)
+            return v
         return v
 
     class Config:

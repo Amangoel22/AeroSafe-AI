@@ -1,9 +1,9 @@
-// Complaint statuses: pending -> active/informed -> closed
 export const COMPLAINT_STATUSES = {
-  PENDING: 'pending',
-  ACTIVE: 'active',
-  INFORMED: 'informed',
-  CLOSED: 'closed',
+  PENDING: "pending",
+  ASSIGNED: "assigned",
+  IN_PROGRESS: "in_progress",
+  RESOLVED: "resolved",
+  FALSE_ALARM: "false_alarm",
 };
 
 export const SEVERITY_LEVELS = {
@@ -25,12 +25,10 @@ export const ISSUE_TYPES = {
 export const LOCATIONS = ['Runway A', 'Runway B', 'Terminal 1', 'Terminal 2'];
 
 export const OFFICERS = [
-  'Engineer A',
-  'Engineer B',
-  'Officer C',
-  'Officer D',
-  'Officer E',
-  'Officer F',
+  { id: 1, name: "Admin" },
+  { id: 2, name: "Rahul Sharma" },
+  { id: 3, name: "Priya Singh" },
+  { id: 4, name: "Arjun Mehta" },
 ];
 
 export const CAMERA_NAMES = [

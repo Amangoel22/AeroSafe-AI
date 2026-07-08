@@ -7,6 +7,8 @@ from app.routes.auth_routes import router as auth_router
 from app.routes.complaint_routes import router as complaint_router
 from app.routes.analytics_routes import router as analytics_router
 from app.utils.logger import logger
+from app.routes.user_routes import router as user_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -41,6 +43,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(complaint_router)
 app.include_router(analytics_router)
+app.include_router(user_router)
 
 @app.get("/")
 async def root():

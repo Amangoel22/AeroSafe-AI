@@ -90,7 +90,7 @@ const ComplaintTable = ({ complaints, onComplaintClick }) => {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-sm font-medium text-slate-900">
-                  {complaint.status.toUpperCase()}
+                  {complaint.status?.toUpperCase() ?? "-"}
                 </td>
                 <td className="px-4 py-3 text-sm text-slate-700">
                   {complaint.assignedTo || <span className="text-slate-400 italic">Unassigned</span>}

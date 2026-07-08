@@ -23,8 +23,8 @@ const KPICards = ({ statistics }) => {
       iconColor: 'text-blue-200',
     },
     {
-      title: 'Active',
-      value: statistics.active,
+      title: "Assigned",
+      value: statistics.assigned,
       icon: Zap,
       bgColor: 'bg-gradient-to-br from-red-500 to-red-600',
       iconColor: 'text-red-200',
@@ -38,7 +38,7 @@ const KPICards = ({ statistics }) => {
     },
     {
       title: 'Resolved',
-      value: statistics.closed,
+      value: statistics.resolved,
       icon: CheckCircle,
       bgColor: 'bg-gradient-to-br from-green-500 to-green-600',
       iconColor: 'text-green-200',

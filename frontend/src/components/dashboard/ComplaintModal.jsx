@@ -6,14 +6,13 @@ import {
   MapPin,
   AlertCircle,
   User,
-  Clock,
 } from "lucide-react";
 import {
   getSeverityColor,
   getStatusColor,
   formatDateTime,
 } from "../../lib/utils.js";
-import { COMPLAINT_STATUSES, OFFICERS } from "../../lib/types.js";
+import { COMPLAINT_STATUSES } from "../../lib/types.js";
 import AssignInformModal from "../AssignInformModal.jsx";
 
 const ComplaintModal = ({
@@ -28,17 +27,8 @@ const ComplaintModal = ({
 
   if (!isOpen || !complaint) return null;
 
-  const canChangeStatus = complaint.status !== COMPLAINT_STATUSES.PENDING;
-  const canCloseComplaint = complaint.status === COMPLAINT_STATUSES.ACTIVE;
-
   // Status Change
   const handleStatusChange = (newStatus) => {
-    if (!canChangeStatus && newStatus !== COMPLAINT_STATUSES.CLOSED) {
-      alert(
-        "Only pending→active (via assign) or active→closed transitions allowed",
-      );
-      return;
-    }
     onUpdateStatus(complaint.id, newStatus);
   };
 
@@ -48,12 +38,15 @@ const ComplaintModal = ({
   };
 
   const handleAssign = (complaintId, officer, actionType) => {
-    if (actionType === "assign") {
-      onAssignComplaint(complaintId, officer, "assign");
-    } else {
-      onInformComplaint(complaintId, officer, "inform");
-    }
-  };
+  console.log("STEP 3", complaintId, officer, actionType);
+
+  onAssignComplaint(complaintId, officer, actionType);
+};
+
+  //dev
+  console.log("Modal complaint:", complaint);
+  console.log("Status:", complaint.status);
+  console.log(COMPLAINT_STATUSES);
 
   return (
     <>
@@ -106,7 +99,7 @@ const ComplaintModal = ({
                 <div className="text-center">
                   <Camera size={48} className="text-slate-600 mx-auto mb-2" />
                   <p className="text-slate-700 font-medium">
-                    {complaint.cameraNumber}
+                    {complaint.cameraId}
                   </p>
                 </div>
               </div>
@@ -122,7 +115,7 @@ const ComplaintModal = ({
                   complaint.status,
                 )}`}
               >
-                {complaint.status.toUpperCase()}
+                {complaint.status?.toUpperCase() ?? "-"}
               </span>
             </div>
 
@@ -133,7 +126,7 @@ const ComplaintModal = ({
                 <div>
                   <p className="font-semibold text-blue-900">Camera</p>
                   <p className="text-sm text-blue-800">
-                    {complaint.cameraNumber}
+                    {complaint.cameraId}
                   </p>
                 </div>
               </div>
@@ -200,33 +193,36 @@ const ComplaintModal = ({
               {complaint.status === COMPLAINT_STATUSES.PENDING && (
                 <button
                   onClick={handleAssignClick}
-                  className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-colors"
+                  className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
                 >
-                  Assign / Inform
+                  Assign Engineer
                 </button>
               )}
 
-              {complaint.status === COMPLAINT_STATUSES.ACTIVE && (
+              {(complaint.status === COMPLAINT_STATUSES.ASSIGNED ||
+                complaint.status === COMPLAINT_STATUSES.IN_PROGRESS) && (
                 <button
-                  onClick={() => handleStatusChange(COMPLAINT_STATUSES.CLOSED)}
-                  className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors"
+                  onClick={() =>
+                    handleStatusChange(COMPLAINT_STATUSES.RESOLVED)
+                  }
+                  className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
                 >
-                  Close Incident
+                  Mark as Resolved
                 </button>
               )}
 
-              {complaint.status === COMPLAINT_STATUSES.INFORMED && (
-                <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                  <p className="text-sm text-purple-900">
-                    Authority has been informed. Waiting for action.
+              {complaint.status === COMPLAINT_STATUSES.RESOLVED && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-900">
+                    This incident has been resolved.
                   </p>
                 </div>
               )}
 
-              {complaint.status === COMPLAINT_STATUSES.CLOSED && (
-                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-900">
-                    This incident has been closed.
+              {complaint.status === COMPLAINT_STATUSES.FALSE_ALARM && (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-900">
+                    This incident was marked as a false alarm.
                   </p>
                 </div>
               )}
@@ -251,7 +247,6 @@ const ComplaintModal = ({
         complaintId={complaint.id}
         onClose={() => setShowAssignModal(false)}
         onAssign={handleAssign}
-        onInform={handleAssign}
       />
     </>
   );

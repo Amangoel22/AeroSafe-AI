@@ -7,7 +7,7 @@ import FilterTabs from '../dashboard/FilterTabs.jsx';
 import ComplaintTable from '../dashboard/ComplaintTable.jsx';
 import ComplaintModal from '../dashboard/ComplaintModal.jsx';
 import { useComplaints } from '../../context/ComplaintContext.jsx';
-import { createRandomAlert } from '../../lib/alert-simulator.js';
+// import { createRandomAlert } from '../../lib/alert-simulator.js';
 import { COMPLAINT_STATUSES } from '../../lib/types.js';
 
 const Dashboard = () => {
@@ -19,7 +19,7 @@ const Dashboard = () => {
     setSearchQuery,
     updateComplaintStatus,
     assignComplaint,
-    addComplaint,
+    // addComplaint,
     getFilteredComplaints,
     getStatistics,
   } = useComplaints();
@@ -29,14 +29,14 @@ const Dashboard = () => {
   const [latestComplaint, setLatestComplaint] = useState(null);
 
   // Start alert simulator
-  useEffect(() => {
-    const unsubscribe = createRandomAlert((newComplaint) => {
-      addComplaint(newComplaint);
-      setLatestComplaint(newComplaint);
-    });
+  // useEffect(() => {
+  //   const unsubscribe = createRandomAlert((newComplaint) => {
+  //     addComplaint(newComplaint);
+  //     setLatestComplaint(newComplaint);
+  //   });
 
-    return () => unsubscribe();
-  }, [addComplaint]);
+  //   return () => unsubscribe();
+  // }, [addComplaint]);
 
   // Clear latest complaint notification after 5 seconds
   useEffect(() => {
@@ -60,6 +60,7 @@ const Dashboard = () => {
   };
 
   const handleAssignComplaint = (complaintId, officer, actionType) => {
+    console.log("STEP 4", complaintId, officer, actionType);
     assignComplaint(complaintId, officer, actionType);
     // Update the modal
     if (selectedComplaint && selectedComplaint.id === complaintId) {
