@@ -49,7 +49,7 @@ async def read_complaints(
     date: str = Query(None, description="Filter by date (e.g. '2026-06-28')"),
     order_by: str = Query(None, description="Sort results by 'month' or 'date'"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user) enable when jwt done
 ):
     try:
         complaints = await get_complaints(db, skip=skip, limit=limit, month=month, date=date, order_by=order_by)
@@ -104,7 +104,7 @@ async def serve_signed_image(
 async def read_complaint_by_id(
     id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user) enable when jwt done
 ):
     try:
         complaint = await get_complaint_by_id(db, id)
@@ -120,18 +120,23 @@ async def read_complaint_by_id(
 
 @router.post("", response_model=ComplaintResponse, status_code=status.HTTP_201_CREATED)
 async def add_complaint(
+    camera_id: int = Form(...),
     location: str = Form(...),
     issue_type: str = Form(...),
     description: Optional[str] = Form(None),
     is_active: Optional[bool] = Form(True),
-    camera_location: Optional[str] = Form(None),
     severity: Optional[Literal['Low', 'Medium', 'High', 'Critical']] = Form('Low'),
-    status_val: Optional[Literal['Pending', 'In Progress', 'Resolved']] = Form('Pending'),
-    camera_no: Optional[str] = Form(None),
+    status_val: Optional[Literal[
+    "Pending",
+    "Assigned",
+    "In Progress",
+    "Resolved",
+    "False Alarm"
+]] = Form('Pending'),
     assigned_to: Optional[int] = Form(None),
     image: UploadFile = File(None),
     db: AsyncSession = Depends(get_db),
-    current_caller: User = Depends(get_current_user_or_service)
+    # current_caller: User = Depends(get_current_user_or_service) enable when jwt done
 ):
     try:
         image_url = await save_uploaded_file(image)
@@ -139,15 +144,14 @@ async def add_complaint(
             logger.info(f"Image uploaded and saved to {image_url}")
 
         data = ComplaintCreateRequest(
+            camera_id=camera_id,
             location=location,
             issue_type=issue_type,
             image_url=image_url,
             description=description,
             is_active=is_active,
-            camera_location=camera_location,
             severity=severity,
             status=status_val,
-            camera_no=camera_no,
             assigned_to=assigned_to
         )
 
@@ -165,18 +169,23 @@ async def add_complaint(
 @router.put("/{id}", response_model=ComplaintResponse, status_code=status.HTTP_200_OK)
 async def edit_complaint(
     id: int,
+    camera_id: Optional[int] = Form(None),
     location: Optional[str] = Form(None),
     issue_type: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
     is_active: Optional[bool] = Form(None),
-    camera_location: Optional[str] = Form(None),
     severity: Optional[Literal['Low', 'Medium', 'High', 'Critical']] = Form(None),
-    status_val: Optional[Literal['Pending', 'In Progress', 'Resolved']] = Form(None),
-    camera_no: Optional[str] = Form(None),
+    status_val: Optional[Literal[
+    "Pending",
+    "Assigned",
+    "In Progress",
+    "Resolved",
+    "False Alarm"
+]] = Form(None),
     assigned_to: Optional[int] = Form(None),
     image: UploadFile = File(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user) enable when jwt done
 ):
     try:
         image_url = await save_uploaded_file(image)
@@ -184,15 +193,14 @@ async def edit_complaint(
             logger.info(f"Updated Image uploaded and saved to {image_url}")
 
         data = ComplaintUpdateRequest(
+            camera_id=camera_id,
             location=location,
             issue_type=issue_type,
             image_url=image_url,
             description=description,
             is_active=is_active,
-            camera_location=camera_location,
             severity=severity,
             status=status_val,
-            camera_no=camera_no,
             assigned_to=assigned_to
         )
 
@@ -211,7 +219,7 @@ async def edit_complaint(
 async def remove_complaint(
     id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user) enable when jwt done
 ):
     try:
         result = await deactivate_complaint(db, id)

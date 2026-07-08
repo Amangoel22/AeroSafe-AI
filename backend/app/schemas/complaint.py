@@ -36,7 +36,13 @@ class ComplaintResponse(BaseModel):
     description: Optional[str] = None
     created_at: datetime
     is_active: bool
-    status: Optional[IncidentStatusResponse] = None
+    status: Literal[
+    "Pending",
+    "Assigned",
+    "In Progress",
+    "Resolved",
+    "False Alarm",
+]
 
     @field_validator("created_at", mode="before")
     def convert_to_ist(cls, v):
@@ -57,35 +63,69 @@ class ComplaintResponse(BaseModel):
         from_attributes = True
 
 class ComplaintCreateRequest(BaseModel):
-    # Incident fields
+    camera_id: int
+
     location: str
     issue_type: str
     image_url: Optional[str] = None
     description: Optional[str] = None
     is_active: Optional[bool] = True
 
-    # IncidentStatus fields
-    camera_location: Optional[str] = None
-    severity: Optional[Literal['Low', 'Medium', 'High', 'Critical']] = 'Low'
-    status: Optional[Literal['Pending', 'In Progress', 'Resolved']] = 'Pending'
-    camera_no: Optional[str] = None
-    reported_at: Optional[datetime] = None
-    resolution_time: Optional[datetime] = None
+    severity: Optional[
+        Literal["Low", "Medium", "High", "Critical"]
+    ] = "Low"
+
+    status: Optional[
+        Literal[
+            "Pending",
+            "Assigned",
+            "In Progress",
+            "Resolved",
+            "False Alarm",
+        ]
+    ] = "Pending"
+
     assigned_to: Optional[int] = None
+    reported_at: Optional[datetime] = None
+    resolved_at: Optional[datetime] = None
+    feedback: Optional[str] = None
 
 class ComplaintUpdateRequest(BaseModel):
-    # Incident fields
-    location: Optional[str] = None
-    issue_type: Optional[str] = None
-    image_url: Optional[str] = None
-    description: Optional[str] = None
-    is_active: Optional[bool] = None
+    camera_id: Optional[int] = None
 
-    # IncidentStatus fields
-    camera_location: Optional[str] = None
-    severity: Optional[Literal['Low', 'Medium', 'High', 'Critical']] = None
-    status: Optional[Literal['Pending', 'In Progress', 'Resolved']] = None
-    camera_no: Optional[str] = None
-    reported_at: Optional[datetime] = None
-    resolution_time: Optional[datetime] = None
     assigned_to: Optional[int] = None
+
+    location: Optional[str] = None
+
+    issue_type: Optional[str] = None
+
+    image_url: Optional[str] = None
+
+    description: Optional[str] = None
+
+    severity: Optional[
+        Literal[
+            "Low",
+            "Medium",
+            "High",
+            "Critical",
+        ]
+    ] = None
+
+    status: Optional[
+        Literal[
+            "Pending",
+            "Assigned",
+            "In Progress",
+            "Resolved",
+            "False Alarm",
+        ]
+    ] = None
+
+    reported_at: Optional[datetime] = None
+
+    resolved_at: Optional[datetime] = None
+
+    feedback: Optional[str] = None
+
+    is_active: Optional[bool] = None
