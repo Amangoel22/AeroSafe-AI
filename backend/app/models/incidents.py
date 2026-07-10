@@ -57,17 +57,16 @@ class Incident(Base):
     )
 
     status = Column(
-        Enum(
-            "Pending",
-            "Assigned",
-            "In Progress",
-            "Resolved",
-            "False Alarm",
-            name="incident_status_enum"
-        ),
-        nullable=False,
-        default="Pending"
-    )
+    Enum(
+        "Pending",
+        "Active",
+        "Resolved",
+        "False Alarm",
+        name="incident_status_enum"
+    ),
+    nullable=False,
+    default="Pending"
+)
 
     reported_at = Column(
         DateTime,

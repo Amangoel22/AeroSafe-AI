@@ -9,7 +9,12 @@ class IncidentStatusResponse(BaseModel):
     incident_id: int
     camera_location: str
     severity: Literal['Low', 'Medium', 'High', 'Critical']
-    status: Literal['Pending', 'In Progress', 'Resolved']
+    status: Literal[
+    "Pending",
+    "Active",
+    "Resolved",
+    "False Alarm",
+]
     camera_no: Optional[str] = None
     reported_at: datetime
     resolution_time: Optional[datetime] = None
@@ -48,12 +53,11 @@ class ComplaintResponse(BaseModel):
     ]
 
     status: Literal[
-        "Pending",
-        "Assigned",
-        "In Progress",
-        "Resolved",
-        "False Alarm",
-    ]
+    "Pending",
+    "Active",
+    "Resolved",
+    "False Alarm",
+]
 
     created_at: datetime
     reported_at: datetime
@@ -101,8 +105,7 @@ class ComplaintCreateRequest(BaseModel):
     status: Optional[
         Literal[
             "Pending",
-            "Assigned",
-            "In Progress",
+            "Active",
             "Resolved",
             "False Alarm",
         ]
@@ -138,8 +141,7 @@ class ComplaintUpdateRequest(BaseModel):
     status: Optional[
         Literal[
             "Pending",
-            "Assigned",
-            "In Progress",
+            "Active",
             "Resolved",
             "False Alarm",
         ]

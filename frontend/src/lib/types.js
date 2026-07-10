@@ -1,7 +1,6 @@
 export const COMPLAINT_STATUSES = {
   PENDING: "pending",
-  ASSIGNED: "assigned",
-  IN_PROGRESS: "in_progress",
+  ACTIVE: "active",
   RESOLVED: "resolved",
   FALSE_ALARM: "false_alarm",
 };

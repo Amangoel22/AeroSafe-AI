@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
-import DashboardLayout from '../layout/DashboardLayout.jsx';
-import KPICards from '../dashboard/KPICards.jsx';
-import LiveAlertPanel from '../dashboard/LiveAlertPanel.jsx';
-import FilterTabs from '../dashboard/FilterTabs.jsx';
-import ComplaintTable from '../dashboard/ComplaintTable.jsx';
-import ComplaintModal from '../dashboard/ComplaintModal.jsx';
-import { useComplaints } from '../../context/ComplaintContext.jsx';
+import React, { useState, useEffect } from "react";
+import { Search } from "lucide-react";
+import DashboardLayout from "../layout/DashboardLayout.jsx";
+import KPICards from "../dashboard/KPICards.jsx";
+import LiveAlertPanel from "../dashboard/LiveAlertPanel.jsx";
+import FilterTabs from "../dashboard/FilterTabs.jsx";
+import ComplaintTable from "../dashboard/ComplaintTable.jsx";
+import ComplaintModal from "../dashboard/ComplaintModal.jsx";
+import { useComplaints } from "../../context/ComplaintContext.jsx";
 // import { createRandomAlert } from '../../lib/alert-simulator.js';
-import { COMPLAINT_STATUSES } from '../../lib/types.js';
+import { COMPLAINT_STATUSES } from "../../lib/types.js";
 
 const Dashboard = () => {
   const {
@@ -59,19 +59,25 @@ const Dashboard = () => {
     }
   };
 
-  const handleAssignComplaint = (complaintId, officer, actionType) => {
-    console.log("STEP 4", complaintId, officer, actionType);
-    assignComplaint(complaintId, officer, actionType);
-    // Update the modal
-    if (selectedComplaint && selectedComplaint.id === complaintId) {
-      const newStatus = actionType === 'assign' ? COMPLAINT_STATUSES.ACTIVE : COMPLAINT_STATUSES.INFORMED;
-      setSelectedComplaint({
-        ...selectedComplaint,
-        assignedTo: officer,
-        status: newStatus,
-      });
+  const handleAssignComplaint = async (complaintId, officer) => {
+    await assignComplaint(complaintId, officer);
+
+    const updated = complaints.find((c) => c.id === complaintId);
+
+    if (updated) {
+      setSelectedComplaint(updated);
     }
   };
+
+  useEffect(() => {
+    if (!selectedComplaint) return;
+
+    const latest = complaints.find((c) => c.id === selectedComplaint.id);
+
+    if (latest) {
+      setSelectedComplaint(latest);
+    }
+  }, [complaints]);
 
   const filteredComplaints = getFilteredComplaints();
   const statistics = getStatistics();
@@ -81,8 +87,12 @@ const Dashboard = () => {
       <div className="p-6 space-y-6">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Real-time Runway Management</h1>
-          <p className="text-slate-600 mt-1">Monitor and manage airport runway incidents</p>
+          <h1 className="text-3xl font-bold text-slate-900">
+            Real-time Runway Management
+          </h1>
+          <p className="text-slate-600 mt-1">
+            Monitor and manage airport runway incidents
+          </p>
         </div>
 
         {/* KPI Cards */}

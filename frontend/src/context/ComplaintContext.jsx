@@ -8,6 +8,12 @@ export const ComplaintProvider = ({ children }) => {
   const [complaints, setComplaints] = useState([]);
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const statusMap = {
+    pending: "Pending",
+    active: "Active",
+    resolved: "Resolved",
+    false_alarm: "False Alarm",
+  };
 
   const loadComplaints = async () => {
     try {
@@ -22,13 +28,11 @@ export const ComplaintProvider = ({ children }) => {
         status:
           item.status === "Pending"
             ? COMPLAINT_STATUSES.PENDING
-            : item.status === "Assigned"
-              ? COMPLAINT_STATUSES.ASSIGNED
-              : item.status === "In Progress"
-                ? COMPLAINT_STATUSES.IN_PROGRESS
-                : item.status === "Resolved"
-                  ? COMPLAINT_STATUSES.RESOLVED
-                  : COMPLAINT_STATUSES.FALSE_ALARM,
+            : item.status === "Active"
+              ? COMPLAINT_STATUSES.ACTIVE
+              : item.status === "Resolved"
+                ? COMPLAINT_STATUSES.RESOLVED
+                : COMPLAINT_STATUSES.FALSE_ALARM,
         assignedTo: item.assigned_to,
         image: item.image_url,
         createdAt: new Date(item.created_at),
@@ -48,7 +52,7 @@ export const ComplaintProvider = ({ children }) => {
   const updateComplaintStatus = async (complaintId, newStatus) => {
     try {
       await updateComplaint(complaintId, {
-        status_val: newStatus,
+        status_val: statusMap[newStatus],
       });
 
       await loadComplaints();
@@ -58,15 +62,12 @@ export const ComplaintProvider = ({ children }) => {
   };
 
   // Assign or inform about complaint
-  console.log("STEP 5");
   const assignComplaint = async (complaintId, officer, actionType) => {
     try {
-      console.log("STEP 6");
       await updateComplaint(complaintId, {
         assigned_to: officer,
-        status_val: actionType === "assign" ? "Assigned" : "In Progress",
+        status_val: "Active",
       });
-      console.log("STEP 7");
 
       await loadComplaints();
     } catch (err) {
@@ -134,10 +135,8 @@ export const ComplaintProvider = ({ children }) => {
       (c) => c.status === COMPLAINT_STATUSES.PENDING,
     ).length;
 
-    const assigned = complaints.filter(
-      (c) =>
-        c.status === COMPLAINT_STATUSES.ASSIGNED ||
-        c.status === COMPLAINT_STATUSES.IN_PROGRESS,
+    const active = complaints.filter(
+      (c) => c.status === COMPLAINT_STATUSES.ACTIVE,
     ).length;
 
     const resolved = complaints.filter(
@@ -148,8 +147,8 @@ export const ComplaintProvider = ({ children }) => {
 
     return {
       total,
-      assigned,
       pending,
+      active,
       resolved,
       critical,
     };

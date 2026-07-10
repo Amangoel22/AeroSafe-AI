@@ -24,9 +24,17 @@ export async function createComplaint(data) {
 }
 
 export async function updateComplaint(id, data) {
+  const formData = new FormData();
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      formData.append(key, value);
+    }
+  });
+
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PUT",
-    body: data,
+    body: formData,
   });
 
   if (!res.ok) {

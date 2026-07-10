@@ -14,9 +14,9 @@ const FilterTabs = ({ currentFilter, onFilterChange, statistics }) => {
       count: statistics.pending,
     },
     {
-      id: COMPLAINT_STATUSES.ASSIGNED,
-      label: "Assigned",
-      count: statistics.assigned,
+      id: COMPLAINT_STATUSES.ACTIVE,
+      label: "Active",
+      count: statistics.active,
     },
     {
       id: COMPLAINT_STATUSES.RESOLVED,

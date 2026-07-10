@@ -23,8 +23,8 @@ const KPICards = ({ statistics }) => {
       iconColor: 'text-blue-200',
     },
     {
-      title: "Assigned",
-      value: statistics.assigned,
+      title: "Active",
+      value: statistics.active,
       icon: Zap,
       bgColor: 'bg-gradient-to-br from-red-500 to-red-600',
       iconColor: 'text-red-200',

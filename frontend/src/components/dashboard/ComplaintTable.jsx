@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getSeverityColor, getStatusColor, formatTime } from '../../lib/utils.js';
 
 const SEVERITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
-const STATUS_ORDER = { pending: 0, active: 1, informed: 2, closed: 3 };
 
 const ComplaintTable = ({ complaints, onComplaintClick }) => {
   const [currentPage, setCurrentPage] = useState(1);

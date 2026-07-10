@@ -1,5 +1,6 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { COMPLAINT_STATUSES } from "../../lib/types";
 
 const MonthlyTrendChart = ({ complaints }) => {
   const data = [
@@ -8,7 +9,9 @@ const MonthlyTrendChart = ({ complaints }) => {
     { month: 'Mar', incidents: 18, resolved: 14 },
     { month: 'Apr', incidents: 22, resolved: 18 },
     { month: 'May', incidents: 25, resolved: 20 },
-    { month: 'Jun', incidents: complaints.length, resolved: complaints.filter((c) => c.status === 'closed').length },
+    { month: 'Jun', incidents: complaints.length, resolved: complaints.filter(
+      c => c.status === COMPLAINT_STATUSES.RESOLVED
+    ).length },
   ];
 
   return (

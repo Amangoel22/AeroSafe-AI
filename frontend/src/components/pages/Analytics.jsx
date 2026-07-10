@@ -8,7 +8,7 @@ import { useComplaints } from '../../context/ComplaintContext.jsx';
 
 const Analytics = () => {
   const { complaints } = useComplaints();
-  const { total, closed } = useComplaints().getStatistics();
+  const { total, resolved } = useComplaints().getStatistics();
 
   return (
     <DashboardLayout>
@@ -27,12 +27,12 @@ const Analytics = () => {
           </div>
           <div className="bg-white rounded-lg shadow-md p-6">
             <p className="text-sm font-semibold text-slate-600 uppercase">Resolved</p>
-            <p className="text-4xl font-bold text-green-600 mt-2">{closed}</p>
+            <p className="text-4xl font-bold text-green-600 mt-2">{resolved}</p>
           </div>
           <div className="bg-white rounded-lg shadow-md p-6">
             <p className="text-sm font-semibold text-slate-600 uppercase">Resolution Rate</p>
             <p className="text-4xl font-bold text-blue-600 mt-2">
-              {total > 0 ? Math.round((closed / total) * 100) : 0}%
+              {total > 0 ? Math.round((resolved / total) * 100) : 0}%
             </p>
           </div>
         </div>

@@ -128,11 +128,10 @@ async def add_complaint(
     severity: Optional[Literal['Low', 'Medium', 'High', 'Critical']] = Form('Low'),
     status_val: Optional[Literal[
     "Pending",
-    "Assigned",
-    "In Progress",
+    "Active",
     "Resolved",
     "False Alarm"
-]] = Form('Pending'),
+]] = Form("Pending"),
     assigned_to: Optional[int] = Form(None),
     image: UploadFile = File(None),
     db: AsyncSession = Depends(get_db),
@@ -177,8 +176,7 @@ async def edit_complaint(
     severity: Optional[Literal['Low', 'Medium', 'High', 'Critical']] = Form(None),
     status_val: Optional[Literal[
     "Pending",
-    "Assigned",
-    "In Progress",
+    "Active",
     "Resolved",
     "False Alarm"
 ]] = Form(None),

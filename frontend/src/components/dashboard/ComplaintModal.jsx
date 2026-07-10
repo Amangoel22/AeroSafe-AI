@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  X,
-  Camera,
-  Calendar,
-  MapPin,
-  AlertCircle,
-  User,
-} from "lucide-react";
+import { X, Camera, Calendar, MapPin, AlertCircle, User } from "lucide-react";
 import {
   getSeverityColor,
   getStatusColor,
@@ -38,10 +31,10 @@ const ComplaintModal = ({
   };
 
   const handleAssign = (complaintId, officer, actionType) => {
-  console.log("STEP 3", complaintId, officer, actionType);
+    console.log("STEP 3", complaintId, officer, actionType);
 
-  onAssignComplaint(complaintId, officer, actionType);
-};
+    onAssignComplaint(complaintId, officer, actionType);
+  };
 
   //dev
   console.log("Modal complaint:", complaint);
@@ -125,9 +118,7 @@ const ComplaintModal = ({
                 <Camera className="text-blue-600 mt-1" size={20} />
                 <div>
                   <p className="font-semibold text-blue-900">Camera</p>
-                  <p className="text-sm text-blue-800">
-                    {complaint.cameraId}
-                  </p>
+                  <p className="text-sm text-blue-800">{complaint.cameraId}</p>
                 </div>
               </div>
             </div>
@@ -199,15 +190,14 @@ const ComplaintModal = ({
                 </button>
               )}
 
-              {(complaint.status === COMPLAINT_STATUSES.ASSIGNED ||
-                complaint.status === COMPLAINT_STATUSES.IN_PROGRESS) && (
+              {complaint.status === COMPLAINT_STATUSES.ACTIVE && (
                 <button
                   onClick={() =>
                     handleStatusChange(COMPLAINT_STATUSES.RESOLVED)
                   }
                   className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
                 >
-                  Mark as Resolved
+                  <button>Mark as Resolved</button>
                 </button>
               )}
 
