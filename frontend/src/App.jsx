@@ -5,7 +5,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext.jsx";
+import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
 import { ComplaintProvider } from "./context/ComplaintContext.jsx";
 import { SettingsProvider } from "./context/SettingsContext.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -14,9 +14,15 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import RoleSelection from "./components/pages/RoleSelection.jsx";
 import Login from "./components/pages/Login.jsx";
 import Dashboard from "./components/pages/Dashboard.jsx";
+import EngineerDashboard from "./components/pages/EngineerDashboard.jsx";
 import Analytics from "./components/pages/Analytics.jsx";
 import History from "./components/pages/History.jsx";
 import Settings from "./components/pages/Settings.jsx";
+
+const DashboardRoute = () => {
+  const { role } = useAuth();
+  return role === "engineer" ? <EngineerDashboard /> : <Dashboard />;
+};
 
 const App = () => {
   return (
@@ -34,7 +40,7 @@ const App = () => {
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
-                    <Dashboard />
+                    <DashboardRoute />
                   </ProtectedRoute>
                 }
               />

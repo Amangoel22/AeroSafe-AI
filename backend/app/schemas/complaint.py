@@ -62,6 +62,7 @@ class ComplaintResponse(BaseModel):
     created_at: datetime
     reported_at: datetime
     resolved_at: Optional[datetime] = None
+    feedback: Optional[str] = None
 
     is_active: bool
 

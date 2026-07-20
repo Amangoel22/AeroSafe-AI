@@ -37,7 +37,7 @@ async def register_user(db: AsyncSession, data: UserRegisterRequest) -> User:
         # full_name is nullable=False in the database, so if None we set to empty string
         new_user = User(
             email=data.email,
-            password=hashed,
+            password_hash=hashed,
             role=data.role,
             full_name=data.full_name or "",
             is_active=True,
@@ -67,7 +67,7 @@ async def login_user(db: AsyncSession, data: UserLoginRequest) -> User:
             detail="Invalid email or password"
         )
     
-    if not verify_password(data.password, user.password):
+    if not verify_password(data.password, user.password_hash):
         logger.warning(f"Login failed: incorrect password for {data.email}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

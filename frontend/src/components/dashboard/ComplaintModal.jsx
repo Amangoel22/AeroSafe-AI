@@ -15,6 +15,7 @@ const ComplaintModal = ({
   onUpdateStatus,
   onAssignComplaint,
   onInformComplaint,
+  onResolveClick,
 }) => {
   const [showAssignModal, setShowAssignModal] = useState(false);
 
@@ -181,7 +182,7 @@ const ComplaintModal = ({
 
             {/* Actions Section */}
             <div className="space-y-3 border-t border-slate-200 pt-4">
-              {complaint.status === COMPLAINT_STATUSES.PENDING && (
+              {complaint.status === COMPLAINT_STATUSES.PENDING && !complaint.assignedTo && (
                 <button
                   onClick={handleAssignClick}
                   className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
@@ -190,22 +191,38 @@ const ComplaintModal = ({
                 </button>
               )}
 
+              {complaint.status === COMPLAINT_STATUSES.PENDING && complaint.assignedTo && (
+                <div className="text-center p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 font-semibold italic">
+                  Assigned to {complaint.assignedTo} (Pending Acceptance)
+                </div>
+              )}
+
               {complaint.status === COMPLAINT_STATUSES.ACTIVE && (
                 <button
                   onClick={() =>
-                    handleStatusChange(COMPLAINT_STATUSES.RESOLVED)
+                    onResolveClick
+                      ? onResolveClick(complaint.id)
+                      : handleStatusChange(COMPLAINT_STATUSES.RESOLVED)
                   }
-                  className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
+                  className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors text-center"
                 >
-                  <button>Mark as Resolved</button>
+                  Mark as Resolved
                 </button>
               )}
 
               {complaint.status === COMPLAINT_STATUSES.RESOLVED && (
-                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-900">
-                    This incident has been resolved.
-                  </p>
+                <div className="space-y-3">
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm font-semibold text-green-950">
+                      This incident has been resolved.
+                    </p>
+                  </div>
+                  {complaint.feedback && (
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                      <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Engineer Feedback</p>
+                      <p className="text-sm text-slate-800 italic">"{complaint.feedback}"</p>
+                    </div>
+                  )}
                 </div>
               )}
 

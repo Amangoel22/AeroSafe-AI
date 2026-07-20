@@ -1,12 +1,14 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { COMPLAINT_STATUSES } from "../lib/types.js";
 import { getComplaints, updateComplaint } from "../api/complaintApi";
+import { getEngineers } from "../api/userApi";
 
 const ComplaintContext = createContext();
 
 export const ComplaintProvider = ({ children }) => {
   const [complaints, setComplaints] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [severityFilter, setSeverityFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const statusMap = {
     pending: "Pending",
@@ -17,26 +19,41 @@ export const ComplaintProvider = ({ children }) => {
 
   const loadComplaints = async () => {
     try {
-      const data = await getComplaints();
+      const [data, engineersList] = await Promise.all([
+        getComplaints(),
+        getEngineers().catch(() => []),
+      ]);
+      console.log("Raw Complaints from API:", data);
 
-      const formatted = data.map((item) => ({
-        id: item.id,
-        location: item.location,
-        issueType: item.issue_type,
-        description: item.description ?? "",
-        severity: item.severity?.toLowerCase() ?? "low",
-        status:
-          item.status === "Pending"
-            ? COMPLAINT_STATUSES.PENDING
-            : item.status === "Active"
-              ? COMPLAINT_STATUSES.ACTIVE
-              : item.status === "Resolved"
-                ? COMPLAINT_STATUSES.RESOLVED
-                : COMPLAINT_STATUSES.FALSE_ALARM,
-        assignedTo: item.assigned_to,
-        image: item.image_url,
-        createdAt: new Date(item.created_at),
-      }));
+      const engMap = {};
+      engineersList.forEach((eng) => {
+        engMap[eng.id] = eng.full_name;
+      });
+
+      const formatted = data.map((item) => {
+        let statusVal = COMPLAINT_STATUSES.PENDING;
+        if (item.status === "Resolved") {
+          statusVal = COMPLAINT_STATUSES.RESOLVED;
+        } else if (item.status === "False Alarm") {
+          statusVal = COMPLAINT_STATUSES.FALSE_ALARM;
+        } else if (item.status === "Active") {
+          statusVal = COMPLAINT_STATUSES.ACTIVE;
+        }
+
+        return {
+          id: item.id,
+          location: item.location,
+          issueType: item.issue_type,
+          description: item.description ?? "",
+          severity: item.severity?.toLowerCase() ?? "low",
+          status: statusVal,
+          assignedTo: engMap[item.assigned_to] || (item.assigned_to ? `ID: ${item.assigned_to}` : null),
+          assignedToId: item.assigned_to,
+          feedback: item.feedback ?? "",
+          image: item.image_url,
+          createdAt: new Date(item.created_at),
+        };
+      });
 
       setComplaints(formatted);
     } catch (err) {
@@ -66,7 +83,7 @@ export const ComplaintProvider = ({ children }) => {
     try {
       await updateComplaint(complaintId, {
         assigned_to: officer,
-        status_val: "Active",
+        status_val: "Pending",
       });
 
       await loadComplaints();
@@ -80,17 +97,29 @@ export const ComplaintProvider = ({ children }) => {
     setComplaints((prevComplaints) => [newComplaint, ...prevComplaints]);
   };
 
-  const getFilteredComplaints = () => {
+  const getFilteredComplaints = (search = "") => {
     let filtered = [...complaints];
 
     // Filter by status
     if (filter !== "all") {
       filtered = filtered.filter((complaint) => complaint.status === filter);
+    } else {
+      // Exclude resolved and false alarm by default on dashboard
+      filtered = filtered.filter(
+        (complaint) =>
+          complaint.status !== COMPLAINT_STATUSES.RESOLVED &&
+          complaint.status !== COMPLAINT_STATUSES.FALSE_ALARM
+      );
+    }
+
+    // Filter by severity
+    if (severityFilter !== "all") {
+      filtered = filtered.filter((complaint) => complaint.severity === severityFilter);
     }
 
     // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (search) {
+      const query = search.toLowerCase();
       filtered = filtered.filter(
         (complaint) =>
           complaint.location.toLowerCase().includes(query) ||
@@ -102,15 +131,23 @@ export const ComplaintProvider = ({ children }) => {
     return filtered;
   };
 
-  // Get history complaints (only closed/resolved)
-  const getHistoryComplaints = () => {
-    let filtered = complaints.filter(
-      (complaint) => complaint.status === COMPLAINT_STATUSES.RESOLVED,
-    );
+  // Get history complaints (all complaints, filtered by status/severity)
+  const getHistoryComplaints = (statusFilter = "all", sevFilter = "all", search = "") => {
+    let filtered = [...complaints];
+
+    // Filter by status
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((complaint) => complaint.status === statusFilter);
+    }
+
+    // Filter by severity
+    if (sevFilter !== "all") {
+      filtered = filtered.filter((complaint) => complaint.severity === sevFilter);
+    }
 
     // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (search) {
+      const query = search.toLowerCase();
       filtered = filtered.filter(
         (complaint) =>
           complaint.location.toLowerCase().includes(query) ||
@@ -158,6 +195,8 @@ export const ComplaintProvider = ({ children }) => {
     complaints,
     filter,
     setFilter,
+    severityFilter,
+    setSeverityFilter,
     searchQuery,
     setSearchQuery,
     updateComplaintStatus,

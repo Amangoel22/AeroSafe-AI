@@ -1,7 +1,11 @@
-import { SEVERITY_COLORS, STATUS_COLORS } from './constants.js';
+import { SEVERITY_COLORS, SEVERITY_BORDER_COLORS, STATUS_COLORS } from './constants.js';
 
 export const getSeverityColor = (severity) => {
   return SEVERITY_COLORS[severity] || SEVERITY_COLORS.low;
+};
+
+export const getSeverityBorderColor = (severity) => {
+  return SEVERITY_BORDER_COLORS[severity] || SEVERITY_BORDER_COLORS.low;
 };
 
 export const getStatusColor = (status) => {

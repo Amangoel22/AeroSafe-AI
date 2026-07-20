@@ -7,12 +7,14 @@ import { useComplaints } from '../../context/ComplaintContext.jsx';
 import { COMPLAINT_STATUSES } from '../../lib/types.js';
 
 const History = () => {
-  const { updateComplaintStatus, assignComplaint, searchQuery, setSearchQuery, getHistoryComplaints } = useComplaints();
+  const { complaints, updateComplaintStatus, assignComplaint, getHistoryComplaints } = useComplaints();
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [severityFilter, setSeverityFilter] = useState("all");
 
-
-  const filteredComplaints = getHistoryComplaints();
+  const filteredComplaints = getHistoryComplaints(statusFilter, severityFilter, searchQuery);
 
   const handleComplaintClick = (complaint) => {
     setSelectedComplaint(complaint);
@@ -26,32 +28,34 @@ const History = () => {
     }
   };
 
+  // Get local statistics based on all complaints in the database
+  const totalClosed = complaints.filter((c) => c.status === COMPLAINT_STATUSES.RESOLVED).length;
+  const totalActive = complaints.filter((c) => c.status === COMPLAINT_STATUSES.ACTIVE).length;
+  const totalPending = complaints.filter((c) => c.status === COMPLAINT_STATUSES.PENDING).length;
+  const totalFalseAlarms = complaints.filter((c) => c.status === COMPLAINT_STATUSES.FALSE_ALARM).length;
+
   return (
     <DashboardLayout>
       <div className="p-6 space-y-6">
         {/* Page Header */}
-        <div>
+        <div className="border-l-4 border-blue-600 pl-4">
           <h1 className="text-3xl font-bold text-slate-900">Incident History</h1>
-          <p className="text-slate-600 mt-1">View all resolved and closed incidents</p>
+          <p className="text-slate-600 mt-1">View all active, pending, or resolved complaints</p>
         </div>
 
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <p className="text-sm font-semibold text-slate-600 uppercase">Total Closed</p>
-            <p className="text-4xl font-bold text-green-600 mt-2">{filteredComplaints.length}</p>
+          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+            <p className="text-sm font-semibold text-slate-600 uppercase">Total Closed / Resolved</p>
+            <p className="text-4xl font-bold text-green-600 mt-2">{totalClosed}</p>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <p className="text-sm font-semibold text-slate-600 uppercase">This Month</p>
-            <p className="text-4xl font-bold text-blue-600 mt-2">
-              {filteredComplaints.filter(
-                (c) => new Date(c.createdAt).getMonth() === new Date().getMonth()
-              ).length}
-            </p>
+          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+            <p className="text-sm font-semibold text-slate-600 uppercase">Total Active</p>
+            <p className="text-4xl font-bold text-blue-600 mt-2">{totalActive}</p>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <p className="text-sm font-semibold text-slate-600 uppercase">Avg Resolution Time</p>
-            <p className="text-4xl font-bold text-purple-600 mt-2">~24h</p>
+          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-amber-500">
+            <p className="text-sm font-semibold text-slate-600 uppercase">Total Pending</p>
+            <p className="text-4xl font-bold text-amber-500 mt-2">{totalPending}</p>
           </div>
         </div>
 
@@ -65,6 +69,59 @@ const History = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+        </div>
+
+        {/* Filters Group */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Status Filter</label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'all', label: 'All', count: complaints.length },
+                { id: COMPLAINT_STATUSES.PENDING, label: 'Pending', count: totalPending },
+                { id: COMPLAINT_STATUSES.ACTIVE, label: 'Active', count: totalActive },
+                { id: COMPLAINT_STATUSES.RESOLVED, label: 'Resolved', count: totalClosed },
+                { id: COMPLAINT_STATUSES.FALSE_ALARM, label: 'False Alarm', count: totalFalseAlarms },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setStatusFilter(tab.id)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all text-sm flex items-center ${
+                    statusFilter === tab.id
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "bg-white text-slate-700 border border-slate-200 hover:border-blue-300"
+                  }`}
+                >
+                  {tab.label}
+                  <span className={`ml-2 px-1.5 py-0.5 rounded text-xs font-semibold ${
+                    statusFilter === tab.id
+                      ? "bg-blue-700 text-white"
+                      : "bg-slate-100 text-slate-700"
+                  }`}>
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Severity Filter</label>
+            <div className="flex flex-wrap gap-2">
+              {['all', 'critical', 'high', 'medium', 'low'].map((sev) => (
+                <button
+                  key={sev}
+                  onClick={() => setSeverityFilter(sev)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all capitalize text-sm ${
+                    severityFilter === sev
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'
+                  }`}
+                >
+                  {sev}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* History Table */}

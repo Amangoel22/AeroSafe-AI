@@ -181,6 +181,7 @@ async def edit_complaint(
     "False Alarm"
 ]] = Form(None),
     assigned_to: Optional[int] = Form(None),
+    feedback: Optional[str] = Form(None),
     image: UploadFile = File(None),
     db: AsyncSession = Depends(get_db),
     # current_user: User = Depends(get_current_user) enable when jwt done
@@ -199,7 +200,8 @@ async def edit_complaint(
             is_active=is_active,
             severity=severity,
             status=status_val,
-            assigned_to=assigned_to
+            assigned_to=assigned_to,
+            feedback=feedback
         )
 
         complaint = await update_complaint(db, id, data)

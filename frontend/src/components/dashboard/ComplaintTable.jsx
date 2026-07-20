@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getSeverityColor, getStatusColor, formatTime } from '../../lib/utils.js';
+import { ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { getSeverityColor, getSeverityBorderColor, getStatusColor, formatTime } from '../../lib/utils.js';
 
 const SEVERITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
 
@@ -70,6 +70,9 @@ const ComplaintTable = ({ complaints, onComplaintClick }) => {
               <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
                 Assigned To
               </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
@@ -77,14 +80,14 @@ const ComplaintTable = ({ complaints, onComplaintClick }) => {
               <tr
                 key={complaint.id}
                 onClick={() => onComplaintClick(complaint)}
-                className="hover:bg-slate-50 cursor-pointer transition-colors"
+                className="hover:bg-blue-50 cursor-pointer transition-colors"
               >
-                <td className="px-4 py-3 font-semibold text-slate-900">{complaint.id}</td>
-                <td className="px-4 py-3 text-sm text-slate-700">{formatTime(complaint.createdAt)}</td>
+                <td className={`px-4 py-3 font-semibold text-slate-900 border-l-[4px] ${getSeverityBorderColor(complaint.severity)}`}>{complaint.id}</td>
+                <td className="px-4 py-3 text-sm text-slate-600 font-mono">{formatTime(complaint.createdAt)}</td>
                 <td className="px-4 py-3 text-sm text-slate-700">{complaint.location}</td>
                 <td className="px-4 py-3 text-sm text-slate-700">{complaint.issueType}</td>
                 <td className="px-4 py-3">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getSeverityColor(complaint.severity)}`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${getSeverityColor(complaint.severity)}`}>
                     {complaint.severity}
                   </span>
                 </td>
@@ -93,6 +96,18 @@ const ComplaintTable = ({ complaints, onComplaintClick }) => {
                 </td>
                 <td className="px-4 py-3 text-sm text-slate-700">
                   {complaint.assignedTo || <span className="text-slate-400 italic">Unassigned</span>}
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onComplaintClick(complaint);
+                    }}
+                    className="flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg font-medium transition-all text-xs border border-blue-200 hover:border-blue-600"
+                  >
+                    <Eye size={13} />
+                    <span>View</span>
+                  </button>
                 </td>
               </tr>
             ))}

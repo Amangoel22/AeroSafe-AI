@@ -77,3 +77,9 @@ frontend/pnpm-debug.log*
 # Operating System
 .DS_Store
 Thumbs.db
+
+
+# to be deleted files
+frontend/start_vite.js
+backend/serve_frontend.py
+backend/check_db.py

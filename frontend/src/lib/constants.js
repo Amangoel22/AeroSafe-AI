@@ -4,7 +4,14 @@ export const SEVERITY_COLORS = {
   critical: 'bg-red-600 text-white',
   high: 'bg-orange-500 text-white',
   medium: 'bg-amber-400 text-black',
-  low: 'bg-blue-500 text-white',
+  low: 'bg-slate-400 text-white',
+};
+
+export const SEVERITY_BORDER_COLORS = {
+  critical: 'border-l-red-600',
+  high: 'border-l-orange-500',
+  medium: 'border-l-amber-400',
+  low: 'border-l-slate-300',
 };
 
 export const STATUS_COLORS = {
