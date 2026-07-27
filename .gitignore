@@ -78,6 +78,18 @@ frontend/pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
+# AI Model Files (download from Google Drive)
+*.pt
+*.onnx
+
+# Detection Output
+ai-service/detection_output/
+ai-service/webcam_output/
+
+# Video Files
+*.avi
+*.mp4
+
 
 # to be deleted files
 frontend/start_vite.js

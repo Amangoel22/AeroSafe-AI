@@ -3,6 +3,7 @@ from ultralytics import YOLO
 from datetime import datetime
 import glob
 import time
+import os
 import requests
 from config import settings   # ← all config values from .env via config.py
 
@@ -16,6 +17,16 @@ def get_issue_type(label: str) -> str:
         "vehicle":      "Runway Incursion",
         "plane":        "Runway Incursion",
         "bird":         "Wildlife Hazard",
+        "Bird":         "Wildlife Hazard",
+        "Platalea":     "Wildlife Hazard",
+        "Dog":          "Wildlife Hazard",
+        "Cat":          "Wildlife Hazard",
+        "Cow":          "Wildlife Hazard",
+        "Elephant":     "Wildlife Hazard",
+        "Sheep":        "Wildlife Hazard",
+        "Pig":          "Wildlife Hazard",
+        "Giraffe":      "Wildlife Hazard",
+        "Deer":         "Wildlife Hazard",
         "obj":          "Foreign Object on Runway",
         "mildcracks":   "Maintenance Required",
         "L1_Hole":      "Maintenance Required",
@@ -146,13 +157,16 @@ if mode == "1":
 # ─── MODE 2: IMAGE FOLDER ─────────────────
 elif mode == "2":
     print("\n🖼️ Starting Image Detection...")
-    print("Press Q to skip image, Ctrl+C to stop\n")
+    print("Auto-advances every 10s | Press any key to skip | Q to quit\n")
 
-    images = glob.glob("runway_images/*.jpg") + glob.glob("runway_images/*.png")
+    images = glob.glob("demo_runway_images/*.jpg") + glob.glob("demo_runway_images/*.png")
+    if not images:
+        images = glob.glob("runway_images/*.jpg") + glob.glob("runway_images/*.png")
     images.sort()
     print(f"Found {len(images)} images\n")
 
     alert_count = 0
+    os.makedirs("detection_output", exist_ok=True)
 
     for img_path in images:
         frame = cv2.imread(img_path)
@@ -173,20 +187,34 @@ elif mode == "2":
                     print_alert(form_data, label, confidence)
                     send_alert(form_data)
 
+        # Save annotated image
         annotated = results[0].plot()
-        img_name = img_path.split("\\")[-1]
+        img_name = img_path.split("\\")[-1].split("/")[-1]
+        output_path = f"detection_output/{img_name}"
+        cv2.imwrite(output_path, annotated)
+        print(f"   📸 Saved: {output_path}")
+
+        # Display with auto-resize to fit screen
+        display = annotated.copy()
+        h, w = display.shape[:2]
+        scale = min(1280 / w, 720 / h, 1.0)
+        if scale < 1.0:
+            display = cv2.resize(display, (int(w * scale), int(h * scale)))
         cv2.putText(
-            annotated,
+            display,
             f"AAI Runway | {img_name[:30]}",
             (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2
         )
-        cv2.imshow("AAI Runway - IMAGE Detection", annotated)
+        cv2.imshow("AAI Runway - AI Detection", display)
 
-        if cv2.waitKey(2000) & 0xFF == ord('q'):
+        key = cv2.waitKey(10000) & 0xFF  # Auto-advance after 10 sec, or press any key
+        if key == ord('q'):
+            print("\n⏹️ Stopped by user.")
             break
 
     cv2.destroyAllWindows()
     print(f"\n✅ Done! Total alerts: {alert_count}")
+    print(f"📁 Detection images saved in 'detection_output' folder")
 
 else:
     print("❌ Invalid choice! Run again and enter 1 or 2")
