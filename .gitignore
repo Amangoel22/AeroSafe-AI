@@ -97,3 +97,7 @@ ai-service/webcam_output/
 frontend/start_vite.js
 backend/serve_frontend.py
 backend/check_db.py
+
+
+
+backend/uploads
