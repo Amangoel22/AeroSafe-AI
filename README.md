@@ -100,16 +100,6 @@ python detect.py
 
 ---
 
-## 🔑 **User Credentials for Testing**
-
-| Portal | Email | Password | Role |
-| :--- | :--- | :--- | :--- |
-| **Admin Portal** | `admin@aai.aero` | `admin123` | Admin |
-| **Engineer Portal** | `rahul@aai.aero` | `engineer123` | Engineer |
-| **Engineer Portal** | `priya@aai.aero` | `engineer123` | Engineer |
-
----
-
 ## 📄 **API Endpoints Summary**
 
 - `POST /api/auth/login` — Authenticate user and receive JWT access token.
