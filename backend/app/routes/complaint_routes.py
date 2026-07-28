@@ -18,7 +18,9 @@ from app.services.complaint_service import (
 from app.services.auth_service import get_current_user, get_current_user_or_service
 from app.models.users import User
 from app.utils.logger import logger
-from app.utils.security import verify_presigned_url
+from app.utils.security import verify_presigned_url, generate_presigned_url
+from sqlalchemy.future import select
+from app.models.camera import Camera
 
 router = APIRouter(prefix="/api/complaints", tags=["Complaints / Incidents"])
 
@@ -49,7 +51,7 @@ async def read_complaints(
     date: str = Query(None, description="Filter by date (e.g. '2026-06-28')"),
     order_by: str = Query(None, description="Sort results by 'month' or 'date'"),
     db: AsyncSession = Depends(get_db),
-    # current_user: User = Depends(get_current_user) enable when jwt done
+    current_user: User = Depends(get_current_user)
 ):
     try:
         complaints = await get_complaints(db, skip=skip, limit=limit, month=month, date=date, order_by=order_by)
@@ -104,11 +106,18 @@ async def serve_signed_image(
 async def read_complaint_by_id(
     id: int,
     db: AsyncSession = Depends(get_db),
-    # current_user: User = Depends(get_current_user) enable when jwt done
+    current_user: User = Depends(get_current_user)
 ):
     try:
         complaint = await get_complaint_by_id(db, id)
-        return complaint
+        
+        # Convert to Pydantic model so we can mutate the image_url safely
+        complaint_dict = ComplaintResponse.model_validate(complaint).model_dump()
+        
+        if complaint_dict.get("image_url"):
+            complaint_dict["image_url"] = generate_presigned_url(complaint_dict["image_url"])
+            
+        return complaint_dict
     except HTTPException as he:
         raise he
     except Exception as e:
@@ -120,7 +129,8 @@ async def read_complaint_by_id(
 
 @router.post("", response_model=ComplaintResponse, status_code=status.HTTP_201_CREATED)
 async def add_complaint(
-    camera_id: int = Form(...),
+    camera_id: Optional[int] = Form(None),
+    camera_no: Optional[str] = Form(None),
     location: str = Form(...),
     issue_type: str = Form(...),
     description: Optional[str] = Form(None),
@@ -135,13 +145,44 @@ async def add_complaint(
     assigned_to: Optional[int] = Form(None),
     image: UploadFile = File(None),
     db: AsyncSession = Depends(get_db),
-    # current_caller: User = Depends(get_current_user_or_service) enable when jwt done
+    current_caller: User = Depends(get_current_user_or_service)
 ):
+    image_url = None  # track saved path for cleanup on failure
     try:
+        # Step 1: Resolve camera_id — get or create the camera record.
+        # This means any new camera that comes online is automatically registered.
+        if not camera_id:
+            if not camera_no:
+                raise HTTPException(status_code=400, detail="camera_id or camera_no is required")
+
+            result = await db.execute(select(Camera).where(Camera.camera_code == camera_no))
+            camera = result.scalars().first()
+
+            if camera:
+                # Camera already known — use its ID
+                camera_id = camera.id
+                logger.info(f"Camera '{camera_no}' found (id={camera_id})")
+            else:
+                # New camera — auto-register it with the info available
+                logger.info(f"Camera '{camera_no}' not found — auto-registering...")
+                new_camera = Camera(
+                    camera_code=camera_no,
+                    camera_name=camera_no,          # name defaults to code; admin can rename later
+                    location=location,
+                    rtsp_url="rtsp://unknown",      # placeholder; admin can update later
+                    is_active=True,
+                )
+                db.add(new_camera)
+                await db.flush()                    # get the new id without full commit yet
+                camera_id = new_camera.id
+                logger.info(f"Camera '{camera_no}' auto-registered with id={camera_id}")
+
+        # Step 2: Save image to disk ONLY after camera is resolved.
         image_url = await save_uploaded_file(image)
         if image_url:
-            logger.info(f"Image uploaded and saved to {image_url}")
+            logger.info(f"Image saved to {image_url}")
 
+        # Step 3: Create the incident row. If this fails, the except block cleans up the image.
         data = ComplaintCreateRequest(
             camera_id=camera_id,
             location=location,
@@ -156,9 +197,18 @@ async def add_complaint(
 
         complaint = await create_complaint(db, data)
         return complaint
+
     except HTTPException as he:
+        # Clean up the image if it was saved but the request is failing
+        if image_url and os.path.exists(image_url):
+            os.remove(image_url)
+            logger.warning(f"Cleaned up orphaned image: {image_url}")
         raise he
     except Exception as e:
+        # Clean up the image on any unexpected error too
+        if image_url and os.path.exists(image_url):
+            os.remove(image_url)
+            logger.warning(f"Cleaned up orphaned image on error: {image_url}")
         logger.error(f"Error in add_complaint route: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -184,7 +234,7 @@ async def edit_complaint(
     feedback: Optional[str] = Form(None),
     image: UploadFile = File(None),
     db: AsyncSession = Depends(get_db),
-    # current_user: User = Depends(get_current_user) enable when jwt done
+    current_user: User = Depends(get_current_user)
 ):
     try:
         image_url = await save_uploaded_file(image)
@@ -219,7 +269,7 @@ async def edit_complaint(
 async def remove_complaint(
     id: int,
     db: AsyncSession = Depends(get_db),
-    # current_user: User = Depends(get_current_user) enable when jwt done
+    current_user: User = Depends(get_current_user)
 ):
     try:
         result = await delete_complaint(db, id)

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { X, Camera, Calendar, MapPin, AlertCircle, User } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, Camera, Calendar, MapPin, AlertCircle, User, Loader2 } from "lucide-react";
 import {
   getSeverityColor,
   getStatusColor,
@@ -7,6 +7,7 @@ import {
 } from "../../lib/utils.js";
 import { COMPLAINT_STATUSES } from "../../lib/types.js";
 import AssignInformModal from "../AssignInformModal.jsx";
+import { getComplaintById } from "../../api/complaintApi.js";
 
 const ComplaintModal = ({
   isOpen,
@@ -18,12 +19,29 @@ const ComplaintModal = ({
   onResolveClick,
 }) => {
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [fullComplaint, setFullComplaint] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && complaint?.id) {
+      setLoading(true);
+      getComplaintById(complaint.id)
+        .then(data => setFullComplaint(data))
+        .catch(err => console.error("Failed to fetch full complaint details:", err))
+        .finally(() => setLoading(false));
+    } else {
+      setFullComplaint(null);
+    }
+  }, [isOpen, complaint?.id]);
 
   if (!isOpen || !complaint) return null;
 
+  // Use full complaint data if available, otherwise fallback to the prop
+  const displayData = fullComplaint || complaint;
+
   // Status Change
   const handleStatusChange = (newStatus) => {
-    onUpdateStatus(complaint.id, newStatus);
+    onUpdateStatus(displayData.id, newStatus);
   };
 
   //Assign task
@@ -89,13 +107,23 @@ const ComplaintModal = ({
               <p className="text-xs font-semibold text-slate-700 uppercase mb-3">
                 CCTV Footage
               </p>
-              <div className="aspect-video bg-slate-400 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <Camera size={48} className="text-slate-600 mx-auto mb-2" />
-                  <p className="text-slate-700 font-medium">
-                    {complaint.cameraId}
-                  </p>
-                </div>
+              <div className="w-full aspect-video bg-black rounded-lg flex items-center justify-center overflow-hidden">
+                {loading ? (
+                  <Loader2 className="animate-spin text-slate-400" size={32} />
+                ) : displayData.imageUrl ? (
+                  <img 
+                    src={displayData.imageUrl} 
+                    alt="CCTV Footage" 
+                    className="max-w-full max-h-full object-contain rounded-lg"
+                  />
+                ) : (
+                  <div className="text-center">
+                    <Camera size={48} className="text-slate-600 mx-auto mb-2" />
+                    <p className="text-slate-700 font-medium">
+                      {displayData.cameraId}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -106,10 +134,10 @@ const ComplaintModal = ({
               </span>
               <span
                 className={`px-4 py-1 rounded-lg font-semibold text-sm ${getStatusColor(
-                  complaint.status,
+                  displayData.status,
                 )}`}
               >
-                {complaint.status?.toUpperCase() ?? "-"}
+                {displayData.status?.toUpperCase() ?? "-"}
               </span>
             </div>
 
@@ -119,7 +147,7 @@ const ComplaintModal = ({
                 <Camera className="text-blue-600 mt-1" size={20} />
                 <div>
                   <p className="font-semibold text-blue-900">Camera</p>
-                  <p className="text-sm text-blue-800">{complaint.cameraId}</p>
+                  <p className="text-sm text-blue-800">{displayData.cameraId}</p>
                 </div>
               </div>
             </div>
@@ -133,7 +161,7 @@ const ComplaintModal = ({
                 <div className="flex items-center space-x-2 mt-2">
                   <Calendar size={16} className="text-slate-600" />
                   <p className="font-medium text-slate-900">
-                    {formatDateTime(complaint.createdAt)}
+                    {formatDateTime(displayData.createdAt)}
                   </p>
                 </div>
               </div>
@@ -145,7 +173,7 @@ const ComplaintModal = ({
                 <div className="flex items-center space-x-2 mt-2">
                   <MapPin size={16} className="text-slate-600" />
                   <p className="font-medium text-slate-900">
-                    {complaint.location}
+                    {displayData.location}
                   </p>
                 </div>
               </div>
@@ -155,7 +183,7 @@ const ComplaintModal = ({
                   Issue Type
                 </p>
                 <p className="font-medium text-slate-900 mt-2">
-                  {complaint.issueType}
+                  {displayData.issueType}
                 </p>
               </div>
 
@@ -166,7 +194,7 @@ const ComplaintModal = ({
                 <div className="flex items-center space-x-2 mt-2">
                   <User size={16} className="text-slate-600" />
                   <p className="font-medium text-slate-900">
-                    {complaint.assignedTo || "Unassigned"}
+                    {displayData.assignedTo || "Unassigned"}
                   </p>
                 </div>
               </div>
@@ -177,12 +205,14 @@ const ComplaintModal = ({
               <p className="text-xs font-semibold text-slate-600 uppercase mb-2">
                 Description
               </p>
-              <p className="text-slate-900">{complaint.description}</p>
+              <p className="text-slate-900 first-letter:uppercase">
+                {displayData.description || "No description provided."}
+              </p>
             </div>
 
             {/* Actions Section */}
             <div className="space-y-3 border-t border-slate-200 pt-4">
-              {complaint.status === COMPLAINT_STATUSES.PENDING && !complaint.assignedTo && (
+              {displayData.status === COMPLAINT_STATUSES.PENDING && !displayData.assignedTo && (
                 <button
                   onClick={handleAssignClick}
                   className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
@@ -191,17 +221,17 @@ const ComplaintModal = ({
                 </button>
               )}
 
-              {complaint.status === COMPLAINT_STATUSES.PENDING && complaint.assignedTo && (
+              {displayData.status === COMPLAINT_STATUSES.PENDING && displayData.assignedTo && (
                 <div className="text-center p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 font-semibold italic">
-                  Assigned to {complaint.assignedTo} (Pending Acceptance)
+                  Assigned to {displayData.assignedTo} (Pending Acceptance)
                 </div>
               )}
 
-              {complaint.status === COMPLAINT_STATUSES.ACTIVE && (
+              {displayData.status === COMPLAINT_STATUSES.ACTIVE && (
                 <button
                   onClick={() =>
                     onResolveClick
-                      ? onResolveClick(complaint.id)
+                      ? onResolveClick(displayData.id)
                       : handleStatusChange(COMPLAINT_STATUSES.RESOLVED)
                   }
                   className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors text-center"
@@ -210,23 +240,23 @@ const ComplaintModal = ({
                 </button>
               )}
 
-              {complaint.status === COMPLAINT_STATUSES.RESOLVED && (
+              {displayData.status === COMPLAINT_STATUSES.RESOLVED && (
                 <div className="space-y-3">
                   <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                     <p className="text-sm font-semibold text-green-950">
                       This incident has been resolved.
                     </p>
                   </div>
-                  {complaint.feedback && (
+                  {displayData.feedback && (
                     <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
                       <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Engineer Feedback</p>
-                      <p className="text-sm text-slate-800 italic">"{complaint.feedback}"</p>
+                      <p className="text-sm text-slate-800 italic">"{displayData.feedback}"</p>
                     </div>
                   )}
                 </div>
               )}
 
-              {complaint.status === COMPLAINT_STATUSES.FALSE_ALARM && (
+              {displayData.status === COMPLAINT_STATUSES.FALSE_ALARM && (
                 <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-sm text-yellow-900">
                     This incident was marked as a false alarm.

@@ -6,7 +6,7 @@ import EngineerFeedbackModal from "../dashboard/EngineerFeedbackModal.jsx";
 import { useComplaints } from "../../context/ComplaintContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { COMPLAINT_STATUSES } from "../../lib/types.js";
-import { getSeverityColor, getSeverityBorderColor, formatTime } from "../../lib/utils.js";
+import { getSeverityColor, getSeverityBorderColor, formatTime, getStatusColor } from "../../lib/utils.js";
 
 const EngineerDashboard = () => {
   const { user } = useAuth();
@@ -29,6 +29,10 @@ const EngineerDashboard = () => {
   const myComplaints = complaints.filter(
     (c) => Number(c.assignedToId) === Number(user?.id)
   );
+  
+  console.log("EngineerDashboard - user?.id:", user?.id);
+  console.log("EngineerDashboard - complaints assignedToId list:", complaints.map(c => c.assignedToId).filter(id => id !== null));
+  console.log("EngineerDashboard - myComplaints length:", myComplaints.length);
 
   // Statistics
   const totalAssigned = myComplaints.length;
@@ -79,29 +83,30 @@ const EngineerDashboard = () => {
   };
 
   const handleResolveSubmit = async (feedbackText) => {
+    // Close modals immediately for snappy UI
+    setIsResolveModalOpen(false);
+    setIsDetailModalOpen(false);
+    const targetId = resolvingComplaintId;
+    setResolvingComplaintId(null);
+    
+    if (selectedComplaint && selectedComplaint.id === targetId) {
+      setSelectedComplaint((prev) => ({
+        ...prev,
+        status: COMPLAINT_STATUSES.RESOLVED,
+        feedback: feedbackText,
+      }));
+    }
+
     try {
-      // In a real backend, we'll update both status and feedback.
-      // We call updateComplaintStatus and let the database save the feedback.
-      // Let's call the update API directly via ComplaintContext update method or create a wrapper.
-      // Since ComplaintContext updates status via updateComplaint API:
       const { updateComplaint } = await import("../../api/complaintApi");
-      await updateComplaint(resolvingComplaintId, {
+      await updateComplaint(targetId, {
         status_val: "Resolved",
         feedback: feedbackText,
       });
       await loadComplaints();
-
-      setIsResolveModalOpen(false);
-      setResolvingComplaintId(null);
-      if (selectedComplaint && selectedComplaint.id === resolvingComplaintId) {
-        setSelectedComplaint((prev) => ({
-          ...prev,
-          status: COMPLAINT_STATUSES.RESOLVED,
-          feedback: feedbackText,
-        }));
-      }
     } catch (err) {
       console.error(err);
+      // In a robust app, we might revert the state if this fails
     }
   };
 
@@ -225,14 +230,14 @@ const EngineerDashboard = () => {
                     </td>
                   </tr>
                 ) : (
-                  filtered.map((complaint) => (
+                  filtered.map((complaint, index) => (
                     <tr
                       key={complaint.id}
                       onClick={() => handleComplaintClick(complaint)}
                       className="hover:bg-blue-50 cursor-pointer transition-colors"
                     >
                       <td className={`px-4 py-3 font-semibold text-slate-900 border-l-[4px] ${getSeverityBorderColor(complaint.severity)}`}>
-                        {complaint.id}
+                        {index + 1}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-600 font-mono">{formatTime(complaint.createdAt)}</td>
                       <td className="px-4 py-3 text-sm text-slate-700">{complaint.location}</td>
@@ -242,8 +247,10 @@ const EngineerDashboard = () => {
                           {complaint.severity}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-slate-900">
-                        {complaint.status?.toUpperCase() ?? "-"}
+                      <td className="px-4 py-3">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${getStatusColor(complaint.status)}`}>
+                          {complaint.status || "-"}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-sm flex gap-2" onClick={(e) => e.stopPropagation()}>
                         <button

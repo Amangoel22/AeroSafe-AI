@@ -58,7 +58,7 @@ async def login(data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = 
 async def logout(
     data: UserLogoutRequest,
     db: AsyncSession = Depends(get_db),
-    # current_user: User = Depends(get_current_user) enable when jwt done
+    current_user: User = Depends(get_current_user)
 ):
     try:
         if current_user.email != data.email:
@@ -82,7 +82,7 @@ async def logout(
 async def delete_account(
     data: AccountDeleteRequest,
     db: AsyncSession = Depends(get_db),
-    # current_user: User = Depends(get_current_user) enable when jwt done
+    current_user: User = Depends(get_current_user)
 ):
     try:
         if current_user.email != data.email:

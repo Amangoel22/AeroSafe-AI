@@ -65,12 +65,13 @@ def build_form_data(alert_count: int, label: str, confidence: float) -> dict:
     }
 
 
-def send_alert(form_data: dict):
+def send_alert(form_data: dict, files: dict = None):
     try:
         response = requests.post(
             settings.BACKEND_URL,
-            data=form_data,              # multipart/form-data — matches backend Form(...)
-            headers=settings.REQUEST_HEADERS,  # X-API-Key for service auth
+            data=form_data,
+            files=files,
+            headers=settings.REQUEST_HEADERS,
             timeout=5
         )
         if response.status_code in [200, 201]:
@@ -132,9 +133,13 @@ if mode == "1":
                             last_alert_time = current_time
                             alert_count += 1
 
+                            annotated_temp = results[0].plot()
+                            _, buffer = cv2.imencode('.jpg', annotated_temp)
+                            files = {'image': ('alert.jpg', buffer.tobytes(), 'image/jpeg')}
+
                             form_data = build_form_data(alert_count, label, confidence)
                             print_alert(form_data, label, confidence)
-                            send_alert(form_data)
+                            send_alert(form_data, files)
 
             annotated = results[0].plot()
             cv2.putText(
@@ -183,9 +188,13 @@ elif mode == "2":
                 if confidence >= settings.CONFIDENCE_THRESHOLD:
                     alert_count += 1
 
+                    annotated_temp = results[0].plot()
+                    _, buffer = cv2.imencode('.jpg', annotated_temp)
+                    files = {'image': ('alert.jpg', buffer.tobytes(), 'image/jpeg')}
+
                     form_data = build_form_data(alert_count, label, confidence)
                     print_alert(form_data, label, confidence)
-                    send_alert(form_data)
+                    send_alert(form_data, files)
 
         # Save annotated image
         annotated = results[0].plot()
