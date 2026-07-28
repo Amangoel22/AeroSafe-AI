@@ -69,7 +69,7 @@ LOCATION=Runway B
 
 ### 5. Download the model
 Download `best.pt` from this Google Drive link:
-https://drive.google.com/file/d/1PyzKBfwo06S07pI_OhFjUJirCh6ca6bp/view?usp=drive_link
+https://drive.google.com/file/d/1LyQX6Tf5uqhXNsDoYyBX6VIQWS2jDc8u/view?usp=drive_link
 Place it in the `ai-service/` folder.
 
 ### 6. Run the detection script
