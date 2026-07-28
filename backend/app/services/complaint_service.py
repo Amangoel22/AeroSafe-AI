@@ -215,7 +215,7 @@ async def update_complaint(
             complaint.status = data.status
 
             if (
-                data.status == "Resolved"
+                (data.status == "Resolved" or data.status == "False Alarm")
                 and complaint.resolved_at is None
             ):
                 complaint.resolved_at = datetime.now()

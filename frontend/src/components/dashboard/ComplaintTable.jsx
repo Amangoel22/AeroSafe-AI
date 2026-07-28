@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { getSeverityColor, getSeverityBorderColor, getStatusColor, formatTime } from '../../lib/utils.js';
+import { formatStatusLabel } from '../../lib/constants.js';
 
 const SEVERITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
 
@@ -98,8 +99,8 @@ const ComplaintTable = ({ complaints, onComplaintClick }) => {
                   </span>
                 </td>
                 <td className="px-4 py-3.5">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${getStatusColor(complaint.status)}`}>
-                    {complaint.status || "-"}
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(complaint.status)}`}>
+                    {formatStatusLabel(complaint.status)}
                   </span>
                 </td>
                 <td className="px-4 py-3.5 text-sm text-slate-700">

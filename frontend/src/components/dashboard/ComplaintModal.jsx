@@ -5,6 +5,7 @@ import {
   getStatusColor,
   formatDateTime,
 } from "../../lib/utils.js";
+import { formatStatusLabel } from "../../lib/constants.js";
 import { COMPLAINT_STATUSES } from "../../lib/types.js";
 import AssignInformModal from "../AssignInformModal.jsx";
 import { getComplaintById } from "../../api/complaintApi.js";
@@ -40,8 +41,9 @@ const ComplaintModal = ({
   const displayData = fullComplaint || complaint;
 
   // Status Change
-  const handleStatusChange = (newStatus) => {
-    onUpdateStatus(displayData.id, newStatus);
+  const handleStatusChange = async (newStatus) => {
+    await onUpdateStatus(displayData.id, newStatus);
+    onClose();
   };
 
   //Assign task
@@ -152,7 +154,7 @@ const ComplaintModal = ({
                   displayData.status,
                 )}`}
               >
-                {displayData.status?.toUpperCase() ?? "-"}
+                {formatStatusLabel(displayData.status)}
               </span>
             </div>
 
@@ -228,31 +230,63 @@ const ComplaintModal = ({
             {/* Actions Section */}
             <div className="space-y-3 border-t border-slate-200 pt-4">
               {displayData.status === COMPLAINT_STATUSES.PENDING && !displayData.assignedTo && !displayData.assignedToId && (
-                <button
-                  onClick={handleAssignClick}
-                  className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
-                >
-                  Assign Engineer
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleAssignClick}
+                    className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+                  >
+                    Assign Engineer
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange(COMPLAINT_STATUSES.FALSE_ALARM)}
+                    className="px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-semibold transition-colors"
+                  >
+                    Mark as False Alarm
+                  </button>
+                </div>
               )}
 
               {displayData.status === COMPLAINT_STATUSES.PENDING && (displayData.assignedTo || displayData.assignedToId) && (
-                <div className="text-center p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 font-semibold italic">
-                  Assigned to {displayData.assignedTo || `ID: ${displayData.assignedToId}`} (Pending Acceptance)
+                <div className="flex flex-col gap-2">
+                  <div className="text-center p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 font-semibold italic">
+                    Assigned to {displayData.assignedTo || `ID: ${displayData.assignedToId}`} (Pending Acceptance)
+                  </div>
+                  <button
+                    onClick={() => handleStatusChange(COMPLAINT_STATUSES.FALSE_ALARM)}
+                    className="w-full px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-semibold text-sm transition-colors"
+                  >
+                    Mark as False Alarm
+                  </button>
                 </div>
               )}
 
               {displayData.status === COMPLAINT_STATUSES.ACTIVE && (
                 onResolveClick ? (
-                  <button
-                    onClick={() => onResolveClick(displayData.id)}
-                    className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors text-center"
-                  >
-                    Mark as Resolved
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => onResolveClick(displayData.id)}
+                      className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors text-center"
+                    >
+                      Mark as Resolved
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange(COMPLAINT_STATUSES.FALSE_ALARM)}
+                      className="px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-semibold transition-colors"
+                    >
+                      Mark as False Alarm
+                    </button>
+                  </div>
                 ) : (
-                  <div className="text-center p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 font-semibold italic">
-                    Assigned engineer is working on this task.
+                  <div className="flex flex-col gap-2">
+                    <div className="text-center p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 font-semibold italic">
+                      Assigned engineer is working on this task.
+                    </div>
+                    <button
+                      onClick={() => handleStatusChange(COMPLAINT_STATUSES.FALSE_ALARM)}
+                      className="w-full px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-semibold text-sm transition-colors"
+                    >
+                      Mark as False Alarm
+                    </button>
                   </div>
                 )
               )}

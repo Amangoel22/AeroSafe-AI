@@ -52,11 +52,11 @@ const Dashboard = () => {
     setIsModalOpen(true);
   };
 
-  const handleUpdateStatus = (complaintId, newStatus) => {
-    updateComplaintStatus(complaintId, newStatus);
+  const handleUpdateStatus = (complaintId, newStatus, feedbackVal) => {
+    updateComplaintStatus(complaintId, newStatus, feedbackVal);
     // Update the modal to show new status
     if (selectedComplaint && selectedComplaint.id === complaintId) {
-      setSelectedComplaint({ ...selectedComplaint, status: newStatus });
+      setSelectedComplaint({ ...selectedComplaint, status: newStatus, feedback: feedbackVal || selectedComplaint.feedback });
     }
   };
 

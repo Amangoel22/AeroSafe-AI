@@ -23,6 +23,11 @@ const FilterTabs = ({ currentFilter, onFilterChange, statistics }) => {
       label: "Resolved",
       count: statistics.resolved,
     },
+    {
+      id: COMPLAINT_STATUSES.FALSE_ALARM,
+      label: "False Alarm",
+      count: statistics.falseAlarm,
+    },
   ];
 
   return (

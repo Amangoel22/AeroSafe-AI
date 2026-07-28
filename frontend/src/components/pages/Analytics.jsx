@@ -20,6 +20,7 @@ const Analytics = () => {
     
   const total = displayComplaints.length;
   const resolved = displayComplaints.filter(c => c.status?.toLowerCase() === 'resolved').length;
+  const falseAlarms = displayComplaints.filter(c => c.status === 'false_alarm' || c.status?.toLowerCase() === 'false alarm').length;
   const criticalCount = displayComplaints.filter(c => c.severity === 'critical').length;
   const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
@@ -78,7 +79,7 @@ const Analytics = () => {
         </div>
 
         {/* Statistics KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-indigo-500 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
             <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Total Incidents</p>
             <p className="text-4xl font-bold text-indigo-600 mt-2 tracking-tight">{total}</p>
@@ -87,6 +88,11 @@ const Analytics = () => {
           <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
             <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Total Resolved</p>
             <p className="text-4xl font-bold text-green-600 mt-2 tracking-tight">{resolved}</p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-amber-500 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+            <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">False Alarms</p>
+            <p className="text-4xl font-bold text-amber-600 mt-2 tracking-tight">{falseAlarms}</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">

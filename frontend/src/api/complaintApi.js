@@ -37,7 +37,9 @@ export async function getComplaintById(id) {
     assignedTo: engineerName,
     feedback: item.feedback ?? "",
     imageUrl: item.image_url,
-    createdAt: new Date(item.created_at),
+    createdAt: item.created_at ? new Date(item.created_at) : null,
+    reportedAt: item.reported_at ? new Date(item.reported_at) : null,
+    resolvedAt: item.resolved_at ? new Date(item.resolved_at) : null,
     cameraId: item.camera_id,
   };
 }

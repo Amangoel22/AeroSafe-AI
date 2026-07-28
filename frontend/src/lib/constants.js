@@ -27,3 +27,9 @@ export const STATUS_LABELS = {
   resolved: "Resolved",
   false_alarm: "False Alarm",
 };
+
+export const formatStatusLabel = (status) => {
+  if (!status) return "Pending";
+  const normalized = status.toLowerCase().replace(" ", "_");
+  return STATUS_LABELS[normalized] || status.replace("_", " ");
+};

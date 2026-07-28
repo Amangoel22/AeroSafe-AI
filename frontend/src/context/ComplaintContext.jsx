@@ -53,7 +53,9 @@ export const ComplaintProvider = ({ children }) => {
           assignedToId: item.assigned_to,
           feedback: item.feedback ?? "",
           image: item.image_url,
-          createdAt: new Date(item.created_at),
+          createdAt: item.created_at ? new Date(item.created_at) : null,
+          reportedAt: item.reported_at ? new Date(item.reported_at) : null,
+          resolvedAt: item.resolved_at ? new Date(item.resolved_at) : null,
         };
       });
 
@@ -70,11 +72,15 @@ export const ComplaintProvider = ({ children }) => {
   }, [isAuthenticated]);
 
   // Update complaint status
-  const updateComplaintStatus = async (complaintId, newStatus) => {
+  const updateComplaintStatus = async (complaintId, newStatus, feedbackVal) => {
     try {
-      await updateComplaint(complaintId, {
+      const payload = {
         status_val: statusMap[newStatus],
-      });
+      };
+      if (feedbackVal) {
+        payload.feedback = feedbackVal;
+      }
+      await updateComplaint(complaintId, payload);
 
       await loadComplaints();
     } catch (err) {
@@ -184,6 +190,10 @@ export const ComplaintProvider = ({ children }) => {
       (c) => c.status === COMPLAINT_STATUSES.RESOLVED,
     ).length;
 
+    const falseAlarm = complaints.filter(
+      (c) => c.status === COMPLAINT_STATUSES.FALSE_ALARM,
+    ).length;
+
     const critical = complaints.filter((c) => c.severity === "critical").length;
 
     return {
@@ -191,6 +201,7 @@ export const ComplaintProvider = ({ children }) => {
       pending,
       active,
       resolved,
+      falseAlarm,
       critical,
     };
   };
