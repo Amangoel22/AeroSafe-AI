@@ -21,13 +21,6 @@ const ComplaintModal = ({
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [fullComplaint, setFullComplaint] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [resolveFeedback, setResolveFeedback] = useState("");
-
-  useEffect(() => {
-    if (!isOpen) {
-      setResolveFeedback("");
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && complaint?.id) {
@@ -235,32 +228,16 @@ const ComplaintModal = ({
               )}
 
               {displayData.status === COMPLAINT_STATUSES.ACTIVE && (
-                <div className="space-y-3">
-                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                    <label className="text-xs font-semibold text-slate-600 uppercase mb-2 block">
-                      Resolution Feedback (Optional)
-                    </label>
-                    <textarea
-                      placeholder="Describe the actions taken to resolve this incident..."
-                      className="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                      rows="3"
-                      value={resolveFeedback}
-                      onChange={(e) => setResolveFeedback(e.target.value)}
-                    />
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (onResolveClick) {
-                        onResolveClick(displayData.id, resolveFeedback);
-                      } else {
-                        handleStatusChange(COMPLAINT_STATUSES.RESOLVED);
-                      }
-                    }}
-                    className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors text-center"
-                  >
-                    Mark as Resolved
-                  </button>
-                </div>
+                <button
+                  onClick={() =>
+                    onResolveClick
+                      ? onResolveClick(displayData.id)
+                      : handleStatusChange(COMPLAINT_STATUSES.RESOLVED)
+                  }
+                  className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors text-center"
+                >
+                  Mark as Resolved
+                </button>
               )}
 
               {displayData.status === COMPLAINT_STATUSES.RESOLVED && (

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search, Eye, CheckCircle, Play } from "lucide-react";
 import DashboardLayout from "../layout/DashboardLayout.jsx";
 import ComplaintModal from "../dashboard/ComplaintModal.jsx";
+import EngineerFeedbackModal from "../dashboard/EngineerFeedbackModal.jsx";
 import { useComplaints } from "../../context/ComplaintContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { COMPLAINT_STATUSES } from "../../lib/types.js";
@@ -18,6 +19,8 @@ const EngineerDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
+  const [resolvingComplaintId, setResolvingComplaintId] = useState(null);
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");
@@ -74,25 +77,36 @@ const EngineerDashboard = () => {
     }
   };
 
-  const handleResolveClick = async (complaintId, feedbackText) => {
+  const handleResolveClick = (complaintId) => {
+    setResolvingComplaintId(complaintId);
+    setIsResolveModalOpen(true);
+  };
+
+  const handleResolveSubmit = async (feedbackText) => {
+    // Close modals immediately for snappy UI
+    setIsResolveModalOpen(false);
+    setIsDetailModalOpen(false);
+    const targetId = resolvingComplaintId;
+    setResolvingComplaintId(null);
+    
+    if (selectedComplaint && selectedComplaint.id === targetId) {
+      setSelectedComplaint((prev) => ({
+        ...prev,
+        status: COMPLAINT_STATUSES.RESOLVED,
+        feedback: feedbackText,
+      }));
+    }
+
     try {
       const { updateComplaint } = await import("../../api/complaintApi");
-      await updateComplaint(complaintId, {
+      await updateComplaint(targetId, {
         status_val: "Resolved",
         feedback: feedbackText,
       });
       await loadComplaints();
-
-      setIsDetailModalOpen(false);
-      if (selectedComplaint && selectedComplaint.id === complaintId) {
-        setSelectedComplaint((prev) => ({
-          ...prev,
-          status: COMPLAINT_STATUSES.RESOLVED,
-          feedback: feedbackText,
-        }));
-      }
     } catch (err) {
       console.error(err);
+      // In a robust app, we might revert the state if this fails
     }
   };
 
@@ -216,14 +230,14 @@ const EngineerDashboard = () => {
                     </td>
                   </tr>
                 ) : (
-                  filtered.map((complaint) => (
+                  filtered.map((complaint, index) => (
                     <tr
                       key={complaint.id}
                       onClick={() => handleComplaintClick(complaint)}
                       className="hover:bg-blue-50 cursor-pointer transition-colors"
                     >
                       <td className={`px-4 py-3 font-semibold text-slate-900 border-l-[4px] ${getSeverityBorderColor(complaint.severity)}`}>
-                        {complaint.id}
+                        {index + 1}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-600 font-mono">{formatTime(complaint.createdAt)}</td>
                       <td className="px-4 py-3 text-sm text-slate-700">{complaint.location}</td>
@@ -285,7 +299,21 @@ const EngineerDashboard = () => {
         onUpdateStatus={updateComplaintStatus}
         onAssignComplaint={() => {}}
         onInformComplaint={() => {}}
-        onResolveClick={(complaintId, feedback) => handleResolveClick(complaintId, feedback)}
+        onResolveClick={(complaintId) => {
+          setIsDetailModalOpen(false);
+          setResolvingComplaintId(complaintId);
+          setIsResolveModalOpen(true);
+        }}
+      />
+
+      {/* Resolve Feedback Input Modal */}
+      <EngineerFeedbackModal
+        isOpen={isResolveModalOpen}
+        onClose={() => {
+          setIsResolveModalOpen(false);
+          setResolvingComplaintId(null);
+        }}
+        onSubmit={handleResolveSubmit}
       />
     </DashboardLayout>
   );
