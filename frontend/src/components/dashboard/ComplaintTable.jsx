@@ -8,18 +8,22 @@ const ComplaintTable = ({ complaints, onComplaintClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Sort complaints in table order
+  // Sort complaints in table order:
+  // 1. Pending & Active complaints come FIRST (ordered by creation time descending - newest first)
+  // 2. Resolved & False Alarm complaints come AT THE BOTTOM
   const sortedComplaints = [...complaints].sort((a, b) => {
-    // Unassigned (assignedTo === null) comes first
-    const aIsUnassigned = a.assignedTo === null ? 0 : 1;
-    const bIsUnassigned = b.assignedTo === null ? 0 : 1;
+    const isClosed = (status) => status === 'resolved' || status === 'false_alarm';
+    const aClosed = isClosed(a.status);
+    const bClosed = isClosed(b.status);
 
-    if (aIsUnassigned !== bIsUnassigned) {
-      return aIsUnassigned - bIsUnassigned;
+    if (aClosed !== bClosed) {
+      return aClosed ? 1 : -1; // Resolved/false alarm moved to bottom
     }
 
-    // Then sort by severity (critical first)
-    return (SEVERITY_ORDER[a.severity] || 4) - (SEVERITY_ORDER[b.severity] || 4);
+    // Secondary sort: preserve order of appearance (newest first)
+    const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return timeB - timeA;
   });
 
   const totalPages = Math.ceil(sortedComplaints.length / itemsPerPage);
@@ -43,71 +47,71 @@ const ComplaintTable = ({ complaints, onComplaintClick }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white rounded-xl border border-slate-200/80 shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-slate-100 border-b border-slate-200">
+          <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 ID
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Time
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Location
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Issue Type
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Severity
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Assigned To
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200">
+          <tbody className="divide-y divide-slate-100">
             {paginatedComplaints.map((complaint, index) => (
               <tr
                 key={complaint.id}
                 onClick={() => onComplaintClick(complaint)}
-                className="hover:bg-blue-50 cursor-pointer transition-colors"
+                className="hover:bg-blue-50/50 cursor-pointer transition-all duration-200"
               >
-                <td className={`px-4 py-3 font-semibold text-slate-900 border-l-[4px] ${getSeverityBorderColor(complaint.severity)}`}>
+                <td className={`px-4 py-3.5 font-bold text-slate-900 border-l-[4px] ${getSeverityBorderColor(complaint.severity)}`}>
                   {startIndex + index + 1}
                 </td>
-                <td className="px-4 py-3 text-sm text-slate-600 font-mono">{formatTime(complaint.createdAt)}</td>
-                <td className="px-4 py-3 text-sm text-slate-700">{complaint.location}</td>
-                <td className="px-4 py-3 text-sm text-slate-700">{complaint.issueType}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3.5 text-sm text-slate-500 font-mono">{formatTime(complaint.createdAt)}</td>
+                <td className="px-4 py-3.5 text-sm text-slate-700 font-medium">{complaint.location}</td>
+                <td className="px-4 py-3.5 text-sm text-slate-700">{complaint.issueType}</td>
+                <td className="px-4 py-3.5">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${getSeverityColor(complaint.severity)}`}>
                     {complaint.severity}
                   </span>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3.5">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${getStatusColor(complaint.status)}`}>
                     {complaint.status || "-"}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-slate-700">
+                <td className="px-4 py-3.5 text-sm text-slate-700">
                   {complaint.assignedTo || <span className="text-slate-400 italic">Unassigned</span>}
                 </td>
-                <td className="px-4 py-3 text-sm">
+                <td className="px-4 py-3.5 text-sm">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onComplaintClick(complaint);
                     }}
-                    className="flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg font-medium transition-all text-xs border border-blue-200 hover:border-blue-600"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg font-semibold transition-all duration-300 text-xs border border-blue-200 hover:border-blue-600 shadow-sm hover:shadow"
                   >
                     <Eye size={13} />
                     <span>View</span>

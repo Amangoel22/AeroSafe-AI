@@ -89,7 +89,7 @@ const Dashboard = () => {
         {/* Page Header */}
         <div className="border-l-4 border-blue-600 pl-4">
           <h1 className="text-3xl font-bold text-slate-900">
-            Real-time Runway Management
+            AeroSafe AI
           </h1>
           <p className="text-slate-600 mt-1">
             Monitor and manage airport runway incidents
@@ -97,7 +97,11 @@ const Dashboard = () => {
         </div>
 
         {/* KPI Cards */}
-        <KPICards statistics={statistics} />
+        <KPICards 
+          statistics={statistics} 
+          currentFilter={filter}
+          onSelectFilter={setFilter} 
+        />
 
         {/* Live Alert Panel */}
         {latestComplaint && (
@@ -105,21 +109,21 @@ const Dashboard = () => {
         )}
 
         {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-3 text-slate-400" size={20} />
+        <div className="relative group">
+          <Search className="absolute left-3.5 top-3.5 text-slate-400 group-hover:text-blue-500 transition-colors duration-300" size={20} />
           <input
             type="text"
             placeholder="Search by location, description, or type..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm hover:shadow-md bg-white"
           />
         </div>
 
         {/* Filters Group */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm transition-all duration-300 hover:shadow-md">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Status Filter</label>
+            <label className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block mb-3">Status Filter</label>
             <FilterTabs
               currentFilter={filter}
               onFilterChange={setFilter}
@@ -127,16 +131,16 @@ const Dashboard = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Severity Filter</label>
+            <label className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block mb-3">Severity Filter</label>
             <div className="flex flex-wrap gap-2">
               {['all', 'critical', 'high', 'medium', 'low'].map((sev) => (
                 <button
                   key={sev}
                   onClick={() => setSeverityFilter(sev)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all capitalize text-sm ${
+                  className={`px-4 h-[34px] rounded-lg font-bold transition-all duration-300 transform active:scale-95 capitalize text-xs tracking-wide flex items-center justify-center ${
                     severityFilter === sev
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-white text-slate-700 border border-slate-200 hover:border-blue-300'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200'
                   }`}
                 >
                   {sev}

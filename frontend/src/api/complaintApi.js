@@ -1,4 +1,5 @@
 import { apiFetch } from './apiClient.js';
+import { getEngineers } from './userApi.js';
 
 const PATH = '/api/complaints';
 
@@ -9,10 +10,20 @@ export async function getComplaints() {
 }
 
 export async function getComplaintById(id) {
-  const res = await apiFetch(`${PATH}/${id}`);
+  const [res, engineers] = await Promise.all([
+    apiFetch(`${PATH}/${id}`),
+    getEngineers().catch(() => [])
+  ]);
   if (!res.ok) throw new Error('Failed to fetch complaint details');
   
   const item = await res.json();
+  
+  const engMap = {};
+  engineers.forEach((e) => {
+    engMap[e.id] = e.full_name;
+  });
+
+  const engineerName = engMap[item.assigned_to] || (item.assigned_to ? `ID: ${item.assigned_to}` : null);
   
   // Map snake_case from backend to camelCase for the frontend modal
   return {
@@ -23,7 +34,7 @@ export async function getComplaintById(id) {
     severity: item.severity?.toLowerCase() ?? "low",
     status: item.status?.toLowerCase() === "false alarm" ? "false_alarm" : item.status?.toLowerCase(),
     assignedToId: item.assigned_to,
-    assignedTo: item.assigned_to ? `ID: ${item.assigned_to}` : null,
+    assignedTo: engineerName,
     feedback: item.feedback ?? "",
     imageUrl: item.image_url,
     createdAt: new Date(item.created_at),

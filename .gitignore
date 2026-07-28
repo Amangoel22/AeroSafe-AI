@@ -61,11 +61,13 @@ frontend/.env.local
 frontend/.env.development.local
 frontend/.env.production.local
 
-# Package Manager Logs
+# Package Manager Logs & Store
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 frontend/pnpm-debug.log*
+.pnpm-store/
+frontend/.pnpm-store/
 
 # Streamlit
 .streamlit/secrets.toml

@@ -28,11 +28,11 @@ def get_issue_type(label: str) -> str:
         "Giraffe":      "Wildlife Hazard",
         "Deer":         "Wildlife Hazard",
         "obj":          "Foreign Object on Runway",
-        "mildcracks":   "Maintenance Required",
-        "L1_Hole":      "Maintenance Required",
-        "L2_Hole":      "Maintenance Required",
-        "severecracks": "Safety Hazard",
-        "L3_Hole":      "Safety Hazard",
+        "mildcracks":   "Mild Cracks - Maintenance Required",
+        "L1_Hole":      "Mild Cracks - Maintenance Required",
+        "L2_Hole":      "Mild Cracks - Maintenance Required",
+        "severecracks": "Severe Cracks - Safety Hazard",
+        "L3_Hole":      "Severe Cracks - Safety Hazard",
     }
     return mapping.get(label, "Foreign Object on Runway")
 
@@ -49,18 +49,31 @@ def get_severity(confidence: float) -> str:
         return "Low"
 
 
+AIRPORT_LOCATIONS = [
+    ("Runway A (09L)", "CAM-RWY-A-01"),
+    ("Runway B (27R)", "CAM-RWY-B-02"),
+    ("Stand AC-12", "CAM-APN-AC12"),
+    ("Taxiway C", "CAM-TAX-C-01"),
+    ("Apron 4", "CAM-APN-04"),
+    ("Terminal 2 Gate B", "CAM-T2-GATE-B"),
+    ("Hangar 2 Maintenance Zone", "CAM-HNG-02"),
+]
+
 def build_form_data(alert_count: int, label: str, confidence: float) -> dict:
     """
     Builds a dict that maps exactly to the backend POST /api/complaints Form fields:
       location, issue_type, description, severity, camera_no, camera_location, status_val
     """
+    # Rotate dynamically through location pool so analytics charts show multiple locations
+    loc, cam = AIRPORT_LOCATIONS[alert_count % len(AIRPORT_LOCATIONS)]
+
     return {
-        "location":         settings.LOCATION,
+        "location":         loc,
         "issue_type":       get_issue_type(label),
         "description":      f"{label} detected at {datetime.now().strftime('%H:%M:%S')} (conf: {confidence:.1%})",
         "severity":         get_severity(confidence),
-        "camera_no":        settings.CAMERA_NAME,
-        "camera_location":  settings.LOCATION,
+        "camera_no":        cam,
+        "camera_location":  loc,
         "status_val":       "Pending",
     }
 
@@ -226,4 +239,4 @@ elif mode == "2":
     print(f"📁 Detection images saved in 'detection_output' folder")
 
 else:
-    print("❌ Invalid choice! Run again and enter 1 or 2")
+    print("❌ Invalid choice! Run again and enter 1 or 2")

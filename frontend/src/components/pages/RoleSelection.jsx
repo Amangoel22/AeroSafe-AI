@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Shield, Wrench } from 'lucide-react';
+import { ChevronRight, Shield, Wrench, CheckCircle2, Sparkles } from 'lucide-react';
 import TopNavbar from '../layout/TopNavbar.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 
@@ -12,29 +12,39 @@ const RoleSelection = () => {
     {
       id: 'admin',
       name: 'Administrator',
-      description: 'Full access to all systems, monitoring, and reporting',
+      description: 'Full access to safety monitoring, incident oversight, and system analytics',
       icon: Shield,
-      color: 'from-blue-500 to-blue-600',
+      gradient: 'from-blue-600 via-indigo-600 to-blue-700',
+      hoverBg: 'hover:bg-gradient-to-br hover:from-blue-50/90 hover:via-slate-50 hover:to-indigo-50/80 hover:border-blue-300 hover:shadow-blue-500/15',
+      iconBg: 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30',
+      accentColor: 'text-blue-600',
+      checkBg: 'bg-blue-100 text-blue-600',
+      ctaGradient: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-blue-500/20',
       features: [
-        'View all incidents and alerts',
-        'Assign tasks to engineers',
-        'Generate reports',
-        'Manage user accounts',
-        'System configuration',
+        'Real-time incident monitoring & maps',
+        'Assign tasks & inform field engineers',
+        'Generate safety analytics & reports',
+        'User management & system configurations',
+        'Live alert notifications & overrides',
       ],
     },
     {
       id: 'engineer',
       name: 'Field Engineer',
-      description: 'On-field incident response and resolution',
+      description: 'On-field incident response, maintenance updates, and resolution reporting',
       icon: Wrench,
-      color: 'from-green-500 to-green-600',
+      gradient: 'from-emerald-600 via-teal-600 to-emerald-700',
+      hoverBg: 'hover:bg-gradient-to-br hover:from-emerald-50/90 hover:via-slate-50 hover:to-teal-50/80 hover:border-emerald-300 hover:shadow-emerald-500/15',
+      iconBg: 'bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/30',
+      accentColor: 'text-emerald-600',
+      checkBg: 'bg-emerald-100 text-emerald-600',
+      ctaGradient: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-500/20',
       features: [
-        'Receive assigned tasks',
-        'Update incident status',
-        'Real-time notifications',
-        'Field reporting',
-        'Equipment diagnostics',
+        'Receive assigned tasks in real-time',
+        'Update incident status & maintenance logs',
+        'Field diagnostics & image verification',
+        'Direct resolution feedback reporting',
+        'Instant alert acknowledgments',
       ],
     },
   ];
@@ -45,55 +55,85 @@ const RoleSelection = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-slate-50/50">
       <TopNavbar />
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-4xl">
+      <div className="flex-1 flex items-center justify-center p-6 md:p-12">
+        <div className="w-full max-w-5xl">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-slate-900 mb-3">AAI Runway</h1>
-            <p className="text-xl text-slate-600">Alert & Incident Management System</p>
-            <p className="text-slate-500 mt-2">Select your role to continue</p>
+          <div className="text-center mb-12 animate-slide-down">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+              AeroSafe AI
+            </h1>
+            <p className="text-lg md:text-xl text-slate-600 font-medium mt-2">
+              Runway Alert Management System
+            </p>
+            <p className="text-sm text-slate-400 mt-1 font-medium">
+              Select your role to continue
+            </p>
           </div>
 
           {/* Roles Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {roles.map((role) => (
-              <button
-                key={role.id}
-                onClick={() => handleSelectRole(role.id)}
-                className="text-left transition-all hover:scale-105 active:scale-95"
-              >
-                <div className="bg-slate-50 rounded-lg shadow-lg p-8 h-full hover:shadow-xl transition-all transform hover:scale-105 border border-slate-200">
-                  <div className={`inline-block p-4 rounded-lg bg-gradient-to-br ${role.color} mb-4`}>
-                    <role.icon size={32} className="text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">{role.name}</h3>
-                  <p className="text-slate-600 mb-4">{role.description}</p>
+            {roles.map((role) => {
+              const Icon = role.icon;
+              return (
+                <div
+                  key={role.id}
+                  onClick={() => handleSelectRole(role.id)}
+                  className={`group relative bg-white rounded-2xl p-8 border border-slate-200/90 shadow-lg cursor-pointer transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl ${role.hoverBg} flex flex-col justify-between overflow-hidden`}
+                >
+                  {/* Subtle top indicator bar */}
+                  <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${role.gradient} opacity-80 group-hover:opacity-100 transition-opacity`} />
 
-                  {/* Features List */}
-                  <ul className="space-y-2 mb-6">
-                    {role.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center text-sm text-slate-600">
-                        <span className={`w-2 h-2 rounded-full mr-2 ${role.id === 'admin' ? 'bg-blue-500' : 'bg-green-500'}`}></span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+                  <div>
+                    {/* Header Icon & Title */}
+                    <div className="flex items-center gap-4 mb-5">
+                      <div className={`p-4 rounded-xl ${role.iconBg} transition-transform duration-300 group-hover:scale-110`}>
+                        <Icon size={30} />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-slate-900 group-hover:text-blue-900 transition-colors">
+                          {role.name}
+                        </h3>
+                        <span className={`text-xs font-bold uppercase tracking-wider ${role.accentColor}`}>
+                          {role.id === 'admin' ? 'Management Level' : 'Operational Level'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-slate-600 font-medium leading-relaxed mb-6">
+                      {role.description}
+                    </p>
+
+                    {/* Features List */}
+                    <div className="space-y-3 mb-8">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Key Capabilities:</p>
+                      {role.features.map((feature, idx) => (
+                        <div key={idx} className="flex items-center text-sm text-slate-700 font-medium gap-3">
+                          <div className={`p-1 rounded-full ${role.checkBg} flex-shrink-0`}>
+                            <CheckCircle2 size={14} />
+                          </div>
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
                   {/* CTA Button */}
-                  <div className={`flex items-center justify-between px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r ${role.color}`}>
+                  <div className={`flex items-center justify-between px-6 py-3.5 rounded-xl text-white font-bold text-sm ${role.ctaGradient} transition-all duration-300 group-hover:shadow-lg`}>
                     <span>Continue as {role.name}</span>
-                    <ChevronRight size={20} className="ml-2" />
+                    <ChevronRight size={18} className="transform transition-transform duration-300 group-hover:translate-x-1.5" />
                   </div>
                 </div>
-              </button>
-            ))}
+              );
+            })}
           </div>
 
           {/* Footer */}
           <div className="text-center mt-12">
-            <p className="text-slate-600">© 2026 AAI Runway. All rights reserved.</p>
+            <p className="text-xs text-slate-400 font-semibold tracking-wide">
+              © 2026 Airports Authority of India • AeroSafe AI System
+            </p>
           </div>
         </div>
       </div>

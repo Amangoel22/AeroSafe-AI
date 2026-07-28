@@ -49,10 +49,25 @@ const ComplaintModal = ({
     setShowAssignModal(true);
   };
 
-  const handleAssign = (complaintId, officer, actionType) => {
+  const handleAssign = async (complaintId, officer, actionType) => {
     console.log("STEP 3", complaintId, officer, actionType);
 
-    onAssignComplaint(complaintId, officer, actionType);
+    // Optimistically update local display state so modal UI updates instantly
+    setFullComplaint((prev) => ({
+      ...(prev || complaint),
+      assignedToId: officer,
+      assignedTo: `Engineer ID: ${officer}`,
+    }));
+
+    await onAssignComplaint(complaintId, officer, actionType);
+
+    // Re-fetch updated complaint detail from backend
+    try {
+      const updated = await getComplaintById(complaintId);
+      setFullComplaint(updated);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   //dev
@@ -212,7 +227,7 @@ const ComplaintModal = ({
 
             {/* Actions Section */}
             <div className="space-y-3 border-t border-slate-200 pt-4">
-              {displayData.status === COMPLAINT_STATUSES.PENDING && !displayData.assignedTo && (
+              {displayData.status === COMPLAINT_STATUSES.PENDING && !displayData.assignedTo && !displayData.assignedToId && (
                 <button
                   onClick={handleAssignClick}
                   className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
@@ -221,23 +236,25 @@ const ComplaintModal = ({
                 </button>
               )}
 
-              {displayData.status === COMPLAINT_STATUSES.PENDING && displayData.assignedTo && (
+              {displayData.status === COMPLAINT_STATUSES.PENDING && (displayData.assignedTo || displayData.assignedToId) && (
                 <div className="text-center p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 font-semibold italic">
-                  Assigned to {displayData.assignedTo} (Pending Acceptance)
+                  Assigned to {displayData.assignedTo || `ID: ${displayData.assignedToId}`} (Pending Acceptance)
                 </div>
               )}
 
               {displayData.status === COMPLAINT_STATUSES.ACTIVE && (
-                <button
-                  onClick={() =>
-                    onResolveClick
-                      ? onResolveClick(displayData.id)
-                      : handleStatusChange(COMPLAINT_STATUSES.RESOLVED)
-                  }
-                  className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors text-center"
-                >
-                  Mark as Resolved
-                </button>
+                onResolveClick ? (
+                  <button
+                    onClick={() => onResolveClick(displayData.id)}
+                    className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors text-center"
+                  >
+                    Mark as Resolved
+                  </button>
+                ) : (
+                  <div className="text-center p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 font-semibold italic">
+                    Assigned engineer is working on this task.
+                  </div>
+                )
               )}
 
               {displayData.status === COMPLAINT_STATUSES.RESOLVED && (

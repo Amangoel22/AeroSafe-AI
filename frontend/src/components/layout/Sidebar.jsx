@@ -23,19 +23,17 @@ const Sidebar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <aside className="w-64 h-full bg-white border-r-4 border-blue-600 shadow-xl flex flex-col">
-      {/* Header */}
-      <div className="p-6 bg-gradient-to-r from-blue-50 to-blue-100 border-b-2 border-blue-600">
-        <h1 className="text-2xl font-bold text-blue-600">
-          AAI Runway
-        </h1>
-        <p className="text-xs text-blue-600 font-semibold mt-1 uppercase tracking-wide">
-          Alert Management
-        </p>
+    <aside className="w-64 h-full bg-white border-r border-slate-200 shadow-lg flex flex-col transition-all duration-300">
+      {/* Mini Elegant Header */}
+      <div className="px-6 py-5 border-b border-slate-100 flex items-center gap-2.5">
+        <div className="h-2.5 w-2.5 rounded-full bg-blue-600 animate-pulse shadow-sm shadow-blue-500" />
+        <span className="text-xs font-black text-slate-700 uppercase tracking-widest">
+          AeroSafe AI Portal
+        </span>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+      <nav className="flex-1 overflow-y-auto p-4 pt-4 space-y-2.5">
         {navItems.map((item) => {
           const Icon = item.icon;
 
@@ -43,12 +41,12 @@ const Sidebar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive(item.path)
-                  ? "bg-blue-600 text-white shadow-md font-semibold"
-                  : "text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-medium"
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 transform hover:translate-x-1 ${isActive(item.path)
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 font-semibold"
+                  : "text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm font-medium"
                 }`}
             >
-              <Icon size={20} />
+              <Icon size={20} className={`transition-transform duration-300 ${isActive(item.path) ? "scale-110" : "group-hover:scale-110"}`} />
               <span className="text-sm">{item.label}</span>
             </Link>
           );
@@ -56,10 +54,10 @@ const Sidebar = () => {
       </nav>
 
       {/* Logout */}
-      <div className="mt-auto p-4 border-t border-slate-200 bg-slate-50">
+      <div className="mt-auto p-4 border-t border-slate-100 bg-slate-50/50">
         <button
           onClick={logout}
-          className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 transition-all font-semibold"
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-300 transform hover:translate-x-1 font-semibold"
         >
           <LogOut size={20} />
           <span>Logout</span>
