@@ -76,13 +76,15 @@ const ComplaintTable = ({ complaints, onComplaintClick }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
-            {paginatedComplaints.map((complaint) => (
+            {paginatedComplaints.map((complaint, index) => (
               <tr
                 key={complaint.id}
                 onClick={() => onComplaintClick(complaint)}
                 className="hover:bg-blue-50 cursor-pointer transition-colors"
               >
-                <td className={`px-4 py-3 font-semibold text-slate-900 border-l-[4px] ${getSeverityBorderColor(complaint.severity)}`}>{complaint.id}</td>
+                <td className={`px-4 py-3 font-semibold text-slate-900 border-l-[4px] ${getSeverityBorderColor(complaint.severity)}`}>
+                  {startIndex + index + 1}
+                </td>
                 <td className="px-4 py-3 text-sm text-slate-600 font-mono">{formatTime(complaint.createdAt)}</td>
                 <td className="px-4 py-3 text-sm text-slate-700">{complaint.location}</td>
                 <td className="px-4 py-3 text-sm text-slate-700">{complaint.issueType}</td>
@@ -91,8 +93,10 @@ const ComplaintTable = ({ complaints, onComplaintClick }) => {
                     {complaint.severity}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm font-medium text-slate-900">
-                  {complaint.status?.toUpperCase() ?? "-"}
+                <td className="px-4 py-3">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${getStatusColor(complaint.status)}`}>
+                    {complaint.status || "-"}
+                  </span>
                 </td>
                 <td className="px-4 py-3 text-sm text-slate-700">
                   {complaint.assignedTo || <span className="text-slate-400 italic">Unassigned</span>}

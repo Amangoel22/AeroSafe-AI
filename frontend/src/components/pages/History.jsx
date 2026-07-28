@@ -6,7 +6,10 @@ import ComplaintModal from '../dashboard/ComplaintModal.jsx';
 import { useComplaints } from '../../context/ComplaintContext.jsx';
 import { COMPLAINT_STATUSES } from '../../lib/types.js';
 
+import { useAuth } from '../../context/AuthContext.jsx';
+
 const History = () => {
+  const { user, role } = useAuth();
   const { complaints, updateComplaintStatus, assignComplaint, getHistoryComplaints } = useComplaints();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -14,7 +17,10 @@ const History = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");
 
-  const filteredComplaints = getHistoryComplaints(statusFilter, severityFilter, searchQuery);
+  const baseHistory = getHistoryComplaints(statusFilter, severityFilter, searchQuery);
+  const filteredComplaints = role === 'engineer' 
+    ? baseHistory.filter(c => Number(c.assignedToId) === Number(user?.id))
+    : baseHistory;
 
   const handleComplaintClick = (complaint) => {
     setSelectedComplaint(complaint);
@@ -29,10 +35,14 @@ const History = () => {
   };
 
   // Get local statistics based on all complaints in the database
-  const totalClosed = complaints.filter((c) => c.status === COMPLAINT_STATUSES.RESOLVED).length;
-  const totalActive = complaints.filter((c) => c.status === COMPLAINT_STATUSES.ACTIVE).length;
-  const totalPending = complaints.filter((c) => c.status === COMPLAINT_STATUSES.PENDING).length;
-  const totalFalseAlarms = complaints.filter((c) => c.status === COMPLAINT_STATUSES.FALSE_ALARM).length;
+  const displayComplaints = role === 'engineer' 
+    ? complaints.filter(c => Number(c.assignedToId) === Number(user?.id))
+    : complaints;
+    
+  const totalClosed = displayComplaints.filter((c) => c.status === COMPLAINT_STATUSES.RESOLVED).length;
+  const totalActive = displayComplaints.filter((c) => c.status === COMPLAINT_STATUSES.ACTIVE).length;
+  const totalPending = displayComplaints.filter((c) => c.status === COMPLAINT_STATUSES.PENDING).length;
+  const totalFalseAlarms = displayComplaints.filter((c) => c.status === COMPLAINT_STATUSES.FALSE_ALARM).length;
 
   return (
     <DashboardLayout>

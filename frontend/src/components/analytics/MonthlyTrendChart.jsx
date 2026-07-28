@@ -3,16 +3,30 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { COMPLAINT_STATUSES } from "../../lib/types";
 
 const MonthlyTrendChart = ({ complaints }) => {
-  const data = [
-    { month: 'Jan', incidents: 12, resolved: 10 },
-    { month: 'Feb', incidents: 15, resolved: 12 },
-    { month: 'Mar', incidents: 18, resolved: 14 },
-    { month: 'Apr', incidents: 22, resolved: 18 },
-    { month: 'May', incidents: 25, resolved: 20 },
-    { month: 'Jun', incidents: complaints.length, resolved: complaints.filter(
-      c => c.status === COMPLAINT_STATUSES.RESOLVED
-    ).length },
-  ];
+  const monthlyData = {};
+  
+  // Initialize last 6 months (including current)
+  const today = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const monthName = d.toLocaleDateString('en-US', { month: 'short' });
+    monthlyData[monthName] = { month: monthName, incidents: 0, resolved: 0 };
+  }
+
+  // Populate with actual data
+  complaints.forEach((c) => {
+    if (c.createdAt) {
+      const monthName = new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short' });
+      if (monthlyData[monthName]) {
+        monthlyData[monthName].incidents += 1;
+        if (c.status === COMPLAINT_STATUSES.RESOLVED || c.status.toLowerCase() === 'resolved') {
+          monthlyData[monthName].resolved += 1;
+        }
+      }
+    }
+  });
+
+  const data = Object.values(monthlyData);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">

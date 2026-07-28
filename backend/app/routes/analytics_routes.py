@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 @router.get("/stats", response_model=List[MonthlyStatsResponse], status_code=status.HTTP_200_OK)
 async def read_monthly_stats(
     db: AsyncSession = Depends(get_db),
-    # current_user: User = Depends(get_current_user) enable when jwt done
+    current_user: User = Depends(get_current_user)
 ):
     try:
         stats = await get_monthly_stats(db)
@@ -28,7 +28,7 @@ async def read_monthly_stats(
 @router.get("/trends", response_model=List[TrendResponse], status_code=status.HTTP_200_OK)
 async def read_resolution_trends(
     db: AsyncSession = Depends(get_db),
-    # current_user: User = Depends(get_current_user) enable when jwt done
+    current_user: User = Depends(get_current_user)
 ):
     try:
         trends = await get_resolution_trends(db)

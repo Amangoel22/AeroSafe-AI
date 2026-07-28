@@ -9,7 +9,9 @@ export const getSeverityBorderColor = (severity) => {
 };
 
 export const getStatusColor = (status) => {
-  return STATUS_COLORS[status] || STATUS_COLORS.pending;
+  if (!status) return STATUS_COLORS.pending;
+  const normalized = status.toLowerCase().replace(" ", "_");
+  return STATUS_COLORS[normalized] || STATUS_COLORS.pending;
 };
 
 export const formatDateTime = (date) => {

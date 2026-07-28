@@ -2,16 +2,19 @@ import React from 'react';
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ComplaintTypeChart = ({ complaints }) => {
-  const data = [
-    { name: 'Safety Hazard', value: complaints.filter((c) => c.issueType === 'Safety Hazard').length },
-    { name: 'Security Issue', value: complaints.filter((c) => c.issueType === 'Security Issue').length },
-    { name: 'Equipment Malfunction', value: complaints.filter((c) => c.issueType === 'Equipment Malfunction').length },
-    { name: 'Maintenance', value: complaints.filter((c) => c.issueType === 'Maintenance Required').length },
-    { name: 'Environmental', value: complaints.filter((c) => c.issueType === 'Environmental Concern').length },
-    { name: 'Other', value: complaints.filter((c) => c.issueType === 'Other').length },
-  ].filter((item) => item.value > 0);
+  // Dynamically group complaints by their actual issueType
+  const typeCounts = {};
+  complaints.forEach((c) => {
+    const type = c.issueType || 'Unknown';
+    typeCounts[type] = (typeCounts[type] || 0) + 1;
+  });
 
-  const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'];
+  const data = Object.keys(typeCounts).map(key => ({
+    name: key,
+    value: typeCounts[key]
+  }));
+
+  const COLORS = ['#4f46e5', '#0d9488', '#0284c7', '#7c3aed', '#c026d3', '#059669', '#0891b2', '#475569'];
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">

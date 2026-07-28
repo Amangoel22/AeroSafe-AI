@@ -66,20 +66,12 @@ class ComplaintResponse(BaseModel):
 
     is_active: bool
 
-    @field_validator("created_at", mode="before")
-    def convert_to_ist(cls, v):
-        if isinstance(v, datetime):
-            if v.tzinfo is None:
-                v = v.replace(tzinfo=IST)
-            return v
-        return v
-
     @field_validator(
-    "created_at",
-    "reported_at",
-    "resolved_at",
-    mode="before"
-)
+        "created_at",
+        "reported_at",
+        "resolved_at",
+        mode="before"
+    )
     def convert_to_ist(cls, v):
         if isinstance(v, datetime):
             if v.tzinfo is None:

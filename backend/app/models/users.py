@@ -13,3 +13,4 @@ class User(Base):
     updated_at = Column(TIMESTAMP, server_default=func.now())
     last_login = Column(DateTime, nullable=True)
     is_active = Column(Boolean, nullable=False, default = True)
+    is_login = Column(Boolean, nullable=False, default = False)

@@ -4,8 +4,10 @@ import { getComplaints, updateComplaint } from "../api/complaintApi";
 import { getEngineers } from "../api/userApi";
 
 const ComplaintContext = createContext();
+import { useAuth } from "./AuthContext.jsx";
 
 export const ComplaintProvider = ({ children }) => {
+  const { isAuthenticated } = useAuth();
   const [complaints, setComplaints] = useState([]);
   const [filter, setFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");
@@ -62,8 +64,10 @@ export const ComplaintProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    loadComplaints();
-  }, []);
+    if (isAuthenticated) {
+      loadComplaints();
+    }
+  }, [isAuthenticated]);
 
   // Update complaint status
   const updateComplaintStatus = async (complaintId, newStatus) => {

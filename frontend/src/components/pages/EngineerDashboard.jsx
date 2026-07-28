@@ -2,11 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Search, Eye, CheckCircle, Play } from "lucide-react";
 import DashboardLayout from "../layout/DashboardLayout.jsx";
 import ComplaintModal from "../dashboard/ComplaintModal.jsx";
-import EngineerFeedbackModal from "../dashboard/EngineerFeedbackModal.jsx";
 import { useComplaints } from "../../context/ComplaintContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { COMPLAINT_STATUSES } from "../../lib/types.js";
-import { getSeverityColor, getSeverityBorderColor, formatTime } from "../../lib/utils.js";
+import { getSeverityColor, getSeverityBorderColor, formatTime, getStatusColor } from "../../lib/utils.js";
 
 const EngineerDashboard = () => {
   const { user } = useAuth();
@@ -19,8 +18,6 @@ const EngineerDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
-  const [resolvingComplaintId, setResolvingComplaintId] = useState(null);
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");
@@ -29,6 +26,10 @@ const EngineerDashboard = () => {
   const myComplaints = complaints.filter(
     (c) => Number(c.assignedToId) === Number(user?.id)
   );
+  
+  console.log("EngineerDashboard - user?.id:", user?.id);
+  console.log("EngineerDashboard - complaints assignedToId list:", complaints.map(c => c.assignedToId).filter(id => id !== null));
+  console.log("EngineerDashboard - myComplaints length:", myComplaints.length);
 
   // Statistics
   const totalAssigned = myComplaints.length;
@@ -73,27 +74,17 @@ const EngineerDashboard = () => {
     }
   };
 
-  const handleResolveClick = (complaintId) => {
-    setResolvingComplaintId(complaintId);
-    setIsResolveModalOpen(true);
-  };
-
-  const handleResolveSubmit = async (feedbackText) => {
+  const handleResolveClick = async (complaintId, feedbackText) => {
     try {
-      // In a real backend, we'll update both status and feedback.
-      // We call updateComplaintStatus and let the database save the feedback.
-      // Let's call the update API directly via ComplaintContext update method or create a wrapper.
-      // Since ComplaintContext updates status via updateComplaint API:
       const { updateComplaint } = await import("../../api/complaintApi");
-      await updateComplaint(resolvingComplaintId, {
+      await updateComplaint(complaintId, {
         status_val: "Resolved",
         feedback: feedbackText,
       });
       await loadComplaints();
 
-      setIsResolveModalOpen(false);
-      setResolvingComplaintId(null);
-      if (selectedComplaint && selectedComplaint.id === resolvingComplaintId) {
+      setIsDetailModalOpen(false);
+      if (selectedComplaint && selectedComplaint.id === complaintId) {
         setSelectedComplaint((prev) => ({
           ...prev,
           status: COMPLAINT_STATUSES.RESOLVED,
@@ -242,8 +233,10 @@ const EngineerDashboard = () => {
                           {complaint.severity}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-slate-900">
-                        {complaint.status?.toUpperCase() ?? "-"}
+                      <td className="px-4 py-3">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${getStatusColor(complaint.status)}`}>
+                          {complaint.status || "-"}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-sm flex gap-2" onClick={(e) => e.stopPropagation()}>
                         <button
@@ -292,21 +285,7 @@ const EngineerDashboard = () => {
         onUpdateStatus={updateComplaintStatus}
         onAssignComplaint={() => {}}
         onInformComplaint={() => {}}
-        onResolveClick={(complaintId) => {
-          setIsDetailModalOpen(false);
-          setResolvingComplaintId(complaintId);
-          setIsResolveModalOpen(true);
-        }}
-      />
-
-      {/* Resolve Feedback Input Modal */}
-      <EngineerFeedbackModal
-        isOpen={isResolveModalOpen}
-        onClose={() => {
-          setIsResolveModalOpen(false);
-          setResolvingComplaintId(null);
-        }}
-        onSubmit={handleResolveSubmit}
+        onResolveClick={(complaintId, feedback) => handleResolveClick(complaintId, feedback)}
       />
     </DashboardLayout>
   );
