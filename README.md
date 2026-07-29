@@ -1,117 +1,429 @@
 # ✈️ AeroSafe AI — Airport Runway Safety Monitoring System
 
-A real-time, AI-driven Airport Runway Safety Monitoring System designed for Airports Authority of India (AAI). The system automatically detects potential runway hazards (such as wildlife, foreign object debris (FOD), structural cracks, and runway incursions), dispatches real-time alerts to airside control personnel, enables assignment to field engineers, and tracks incident resolution with interactive analytics.
+AeroSafe AI is an **AI-powered runway safety monitoring and incident management platform** designed to automate the detection, reporting, assignment, and resolution of airport runway hazards.
+
+The system combines **YOLO-based computer vision**, a **FastAPI backend**, and dedicated **Admin and Engineer portals** to provide an end-to-end workflow — from detecting a runway hazard to assigning personnel, tracking corrective action, and analysing historical safety data.
 
 ---
 
-## 🎯 **Project Purpose & Features**
+## 🎯 Project Overview
 
-### 📋 **Key Features**
-- **🤖 Real-time AI Hazard Detection**: Integrates YOLO-based Computer Vision model (`detect.py`) to monitor runway feeds for Foreign Objects (FOD), Wildlife, Structural Cracks, and Incursions.
-- **🛡️ Role-Based Access Portals**:
-  - **Admin / Control Center Portal**: Monitor all incoming alerts, search/filter incidents, assign tasks to field engineers, view analytics, and export reports.
-  - **Engineer Portal**: View assigned task queues, accept active tasks, record resolution feedback, and mark incidents as resolved.
-- **📊 Advanced Analytics Dashboard**: Visualizes incident trends, runway location risk distribution, severity breakdown, and engineer resolution times using full-width charts.
-- **📁 Excel Export**: Export filtered incident history and engineer logs directly to Excel (`.xlsx`).
-- **🔐 Secure API & HMAC Authentication**: Secure communication between AI Detection Service, Backend, and Frontend.
+Airport runways require continuous monitoring to identify hazards such as structural damage, foreign objects, wildlife, and runway incursions.
 
----
+AeroSafe AI provides a centralized workflow where AI-detected hazards are automatically converted into incidents and presented to airport administrators for verification and assignment.
 
-## 🏗️ **System Architecture**
+Once assigned, field engineers can accept incidents, perform the required corrective action, provide mandatory resolution feedback, and close the incident.
 
-```
-AAI-SAFETY-MONITORING-SYSTEM/
-├── backend/          # FastAPI REST API Backend (Python 3.11+)
-├── frontend/         # React + Vite + Tailwind CSS Frontend (Node.js)
-└── ai-service/       # YOLO Computer Vision AI Service & Detection Engine
-```
-
----
-
-## 🚀 **Getting Started**
-
-### 1️⃣ **Prerequisites**
-- **Python**: `3.11` or higher
-- **Node.js**: `v18.0.0` or higher
-- **pnpm**: `pnpm install -g pnpm` (or `npm`)
-
----
-
-### 2️⃣ **Backend Setup (FastAPI)**
-
-```bash
-# Navigate to the backend directory
-cd backend
-
-# Create a virtual environment
-python3 -m venv venv
-
-# Activate the virtual environment
-# On macOS/Linux:
-source venv/bin/activate
-# On Windows (Command Prompt):
-# venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start the Backend Server (runs on http://localhost:8000)
-uvicorn main:app --reload
+```text
+Runway Image / Video Feed
+          ↓
+   AI Hazard Detection
+          ↓
+   Incident Generated
+          ↓
+       PENDING
+          ↓
+   Admin Reviews Alert
+          ↓
+   Engineer Assigned
+          ↓
+       PENDING
+          ↓
+   Engineer Accepts
+          ↓
+        ACTIVE
+          ↓
+  Corrective Action Taken
+          ↓
+ Mandatory Feedback Submitted
+          ↓
+       RESOLVED
 ```
 
+An administrator can also classify an invalid AI detection as a **False Alarm**.
+
 ---
 
-### 3️⃣ **Frontend Setup (React + Vite)**
+# ✨ Key Features
 
-```bash
-# Open a new terminal and navigate to the frontend directory
-cd frontend
+## 🤖 AI-Powered Hazard Detection
 
-# Install dependencies using pnpm
-pnpm install
+AeroSafe AI integrates YOLO-based computer vision models for automated runway monitoring.
 
-# Start the Vite Development Server (runs on http://localhost:5173)
-pnpm run dev
+The detection pipeline can identify runway safety concerns including:
+
+- Foreign Object Debris (FOD)
+- Structural cracks and runway damage
+- Wildlife and birds
+- People or vehicles on restricted runway areas
+- Other runway incursions
+
+Detected hazards can automatically generate incidents containing information such as location, camera, issue type, severity, timestamp, and detection evidence.
+
+---
+
+## 🚨 Real-Time Incident Management
+
+Every detected runway hazard follows a controlled incident lifecycle.
+
+### 1. Pending
+
+A newly detected incident is created with:
+
+```text
+Status: Pending
+Assigned Engineer: Unassigned
+```
+
+It immediately becomes visible to administrators on the monitoring dashboard.
+
+### 2. Engineer Assignment
+
+The administrator reviews the incident and assigns it to an available field engineer.
+
+Importantly, **assignment does not activate the incident**.
+
+After assignment:
+
+```text
+Status: Pending
+Assigned Engineer: <Engineer>
+```
+
+The incident remains Pending until the engineer acknowledges the task.
+
+### 3. Engineer Acceptance
+
+The assigned engineer sees the incident in their task queue and explicitly accepts it.
+
+Only then does the status transition:
+
+```text
+Pending → Active
+```
+
+This distinguishes between an incident that has merely been dispatched and one that is actively being handled.
+
+### 4. Resolution & Mandatory Feedback
+
+After completing the corrective action, the engineer must submit **resolution feedback** describing the action taken.
+
+Feedback is mandatory before an incident can be marked as resolved.
+
+```text
+Active
+   ↓
+Engineer performs corrective action
+   ↓
+Resolution feedback submitted
+   ↓
+Resolved
+```
+
+This provides an auditable record of how every runway safety incident was handled.
+
+### 5. False Alarm
+
+If an administrator determines that an AI-generated detection is not a genuine runway hazard, the incident can be classified as:
+
+```text
+False Alarm
+```
+
+This separates invalid detections from successfully resolved safety incidents.
+
+---
+
+# 👨‍💼 Admin / Control Centre Portal
+
+The Admin portal provides centralized monitoring and incident coordination.
+
+Administrators can:
+
+- Monitor incoming AI-generated incidents
+- Receive alerts for newly detected hazards
+- Review incident details and detection evidence
+- View severity and runway location
+- Search and filter incidents
+- Assign incidents to field engineers
+- Monitor Pending and Active incidents
+- Identify unassigned incidents
+- Mark incorrect AI detections as False Alarms
+- Track engineer assignments
+- Review completed incidents
+- Access incident history
+- Export operational data
+- View runway safety analytics
+
+---
+
+# 👷 Engineer Portal
+
+The Engineer portal provides field personnel with their own incident workflow.
+
+Engineers can:
+
+- View incidents assigned specifically to them
+- Review hazard details and location
+- Accept assigned incidents
+- Transition accepted incidents from **Pending → Active**
+- Track currently active tasks
+- Perform corrective actions
+- Submit mandatory resolution feedback
+- Mark completed incidents as **Resolved**
+- View their incident/task history
+
+This ensures that administrators coordinate incidents while engineers control the actual acceptance and completion of field work.
+
+---
+
+# 📊 Analytics & Safety Intelligence
+
+AeroSafe AI includes a dedicated **Analytics Dashboard** that transforms historical incident data into operational safety insights.
+
+The analytics system includes multiple graphs and visualisations covering:
+
+### 📍 Location-Based Analysis
+
+Analyse how incidents are distributed across different runway locations and identify areas experiencing higher concentrations of hazards.
+
+### ⚠️ Severity Analysis
+
+Visualise incidents according to severity levels:
+
+```text
+Low
+Medium
+High
+Critical
+```
+
+This helps identify the overall risk profile of detected runway hazards.
+
+### 🔍 Issue-Type Analysis
+
+Analyse the frequency of different detected hazards such as:
+
+- Structural cracks
+- Foreign objects
+- Wildlife
+- Runway incursions
+- Other detected safety issues
+
+### ⏱️ Resolution-Time Analysis
+
+Track how long incidents take to move from detection to resolution.
+
+This can help evaluate operational response performance and identify incidents that required unusually long corrective actions.
+
+### 📈 Incident Trends
+
+Historical graphs provide visibility into:
+
+- Incident frequency over time
+- Resolved incidents
+- Hazard trends
+- Severity distribution
+- Issue-type distribution
+- Location-based incident patterns
+- Resolution performance
+
+Together, these analytics provide administrators with more than a live monitoring dashboard — they provide historical runway safety intelligence.
+
+---
+
+# 🔐 Security & Authentication
+
+AeroSafe AI implements multiple security mechanisms across the platform.
+
+## JWT Authentication
+
+User authentication is handled using **JSON Web Tokens (JWT)**.
+
+After successful login, authenticated users receive an access token used to access protected backend resources.
+
+```text
+User Login
+    ↓
+Credentials Verified
+    ↓
+JWT Access Token Generated
+    ↓
+Authenticated API Requests
+```
+
+## 🔑 Password Security
+
+User passwords are not intended to be stored as plaintext.
+
+Passwords are hashed using **bcrypt** before being stored in the database.
+
+During authentication:
+
+```text
+Entered Password
+       ↓
+bcrypt Verification
+       ↓
+Stored Password Hash
+       ↓
+Authentication Result
+```
+
+This prevents the original password from being directly recoverable from the stored database value.
+
+## 🛡️ Additional API Security
+
+The backend architecture also supports:
+
+- Role-based access control
+- Protected API endpoints
+- AI service API authentication
+- HMAC-based request/resource verification
+- Signed access to incident images
+- Environment-variable-based secret management
+
+Sensitive values such as database credentials, JWT secrets, and API keys are stored through environment variables rather than hard-coded into application source code.
+
+---
+
+# 🏗️ System Architecture
+
+```text
+                    RUNWAY CCTV / IMAGE FEED
+                              │
+                              ▼
+                  ┌───────────────────────┐
+                  │   YOLO AI Detection   │
+                  │   OpenCV + PyTorch    │
+                  └───────────┬───────────┘
+                              │
+                       Hazard Detection
+                              │
+                              ▼
+                  ┌───────────────────────┐
+                  │    FastAPI Backend    │
+                  │   Incident Services   │
+                  │   Authentication      │
+                  └───────────┬───────────┘
+                              │
+                     ┌────────┴────────┐
+                     │                 │
+                     ▼                 ▼
+             ┌──────────────┐   ┌──────────────┐
+             │ PostgreSQL / │   │ React + Vite │
+             │   Supabase   │   │   Frontend   │
+             └──────────────┘   └──────┬───────┘
+                                       │
+                              ┌────────┴─────────┐
+                              ▼                  ▼
+                       ┌─────────────┐    ┌─────────────┐
+                       │    Admin    │    │  Engineer   │
+                       │   Portal    │    │   Portal    │
+                       └─────────────┘    └─────────────┘
 ```
 
 ---
 
-### 4️⃣ **AI Detection Service Setup (YOLO Detection Engine)**
+# 🛠️ Tech Stack
 
-```bash
-# Open a new terminal and navigate to the ai-service directory
-cd ai-service
+### Frontend
+- React
+- Vite
+- Tailwind CSS
+- React Router
+- Recharts
+- Lucide React
+- XLSX
 
-# Create a virtual environment
-python3 -m venv venv
+### Backend
+- Python
+- FastAPI
+- SQLAlchemy
+- Pydantic
+- Uvicorn
 
-# Activate the virtual environment
-# On macOS/Linux:
-source venv/bin/activate
-# On Windows (Command Prompt):
-# venv\Scripts\activate
+### Database
+- PostgreSQL
+- Supabase
 
-# Install dependencies
-pip install -r requirements.txt
+### AI / Computer Vision
+- Ultralytics YOLO
+- PyTorch
+- OpenCV
 
-# Run the AI Detection Script
-python detect.py
+### Security
+- JWT Authentication
+- bcrypt Password Hashing
+- HMAC Verification
+- Environment-Based Secret Management
+
+---
+
+# 🔄 Incident State Machine
+
+The core incident workflow can be summarized as:
+
+```text
+                        ┌─────────────┐
+                        │   PENDING   │
+                        │ Unassigned  │
+                        └──────┬──────┘
+                               │
+                         Admin assigns
+                            engineer
+                               │
+                               ▼
+                        ┌─────────────┐
+                        │   PENDING   │
+                        │  Assigned   │
+                        └──────┬──────┘
+                               │
+                        Engineer accepts
+                               │
+                               ▼
+                        ┌─────────────┐
+                        │    ACTIVE   │
+                        └──────┬──────┘
+                               │
+                      Corrective action
+                               │
+                               ▼
+                     Mandatory Feedback
+                               │
+                               ▼
+                        ┌─────────────┐
+                        │  RESOLVED   │
+                        └─────────────┘
+
+
+        Invalid AI Detection
+                │
+                ▼
+        ┌───────────────┐
+        │  FALSE ALARM  │
+        └───────────────┘
 ```
 
----
+The distinction between **assigned** and **active** is intentionally handled through assignment state rather than treating assignment itself as an incident status:
 
-## 📄 **API Endpoints Summary**
-
-- `POST /api/auth/login` — Authenticate user and receive JWT access token.
-- `GET /api/complaints` — List all complaints/incidents.
-- `POST /api/complaints` — Submit a new AI-detected incident (requires API Key header).
-- `PUT /api/complaints/{id}` — Update complaint status or assign engineer.
-- `GET /api/users/engineers` — Fetch list of field engineers.
+> **Assigned Pending** = An engineer has been selected but has not yet accepted the task.  
+> **Active** = The assigned engineer has acknowledged the incident and corrective action is underway.  
+> **Resolved** = Corrective action has been completed and mandatory feedback has been submitted.
 
 ---
 
-## 🛠️ **Tech Stack**
+# 🌟 Future Scope
 
-- **Frontend**: React, Vite, Tailwind CSS, Recharts, Lucide Icons, XLSX.
-- **Backend**: FastAPI, SQLAlchemy, SQLite, Pydantic, Uvicorn.
-- **AI Service**: OpenCV, Ultralytics YOLOv8/YOLOv11, PyTorch.
+Potential extensions include:
+
+- Continuous live CCTV stream inference
+- Multi-camera parallel detection
+- Automated escalation of unattended critical incidents
+- Email/SMS/push notifications
+- Engineer mobile application
+- Interactive runway hazard heatmaps
+- Predictive runway maintenance
+- AI model accuracy and false-positive analytics
+- Response-time SLA monitoring
+- Multi-airport centralized safety monitoring
