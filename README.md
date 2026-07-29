@@ -412,18 +412,3 @@ The distinction between **assigned** and **active** is intentionally handled thr
 > **Resolved** = Corrective action has been completed and mandatory feedback has been submitted.
 
 ---
-
-# 🌟 Future Scope
-
-Potential extensions include:
-
-- Continuous live CCTV stream inference
-- Multi-camera parallel detection
-- Automated escalation of unattended critical incidents
-- Email/SMS/push notifications
-- Engineer mobile application
-- Interactive runway hazard heatmaps
-- Predictive runway maintenance
-- AI model accuracy and false-positive analytics
-- Response-time SLA monitoring
-- Multi-airport centralized safety monitoring
