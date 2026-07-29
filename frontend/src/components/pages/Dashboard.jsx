@@ -29,20 +29,20 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [latestComplaint, setLatestComplaint] = useState(null);
 
-  // Start alert simulator
-  // useEffect(() => {
-  //   const unsubscribe = createRandomAlert((newComplaint) => {
-  //     addComplaint(newComplaint);
-  //     setLatestComplaint(newComplaint);
-  //   });
+  // Register new incident listener
+  useEffect(() => {
+    window.onNewIncidentDetected = (newIncident) => {
+      setLatestComplaint(newIncident);
+    };
+    return () => {
+      window.onNewIncidentDetected = null;
+    };
+  }, []);
 
-  //   return () => unsubscribe();
-  // }, [addComplaint]);
-
-  // Clear latest complaint notification after 5 seconds
+  // Clear latest complaint notification after 6 seconds
   useEffect(() => {
     if (latestComplaint) {
-      const timeout = setTimeout(() => setLatestComplaint(null), 5000);
+      const timeout = setTimeout(() => setLatestComplaint(null), 6000);
       return () => clearTimeout(timeout);
     }
   }, [latestComplaint]);

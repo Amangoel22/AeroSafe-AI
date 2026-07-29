@@ -19,13 +19,84 @@ export const ComplaintProvider = ({ children }) => {
     false_alarm: "False Alarm",
   };
 
+  // Global audio context instance unlocked on first user interaction
+  const audioContextRef = React.useRef(null);
+  const isInitialLoadRef = React.useRef(true);
+  const knownComplaintIdsRef = React.useRef(new Set());
+
+  // Unlock Web Audio API context on first user click/keydown anywhere on page
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (!audioContextRef.current) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          audioContextRef.current = new AudioCtx();
+        }
+      }
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume();
+      }
+    };
+
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
+
+  const triggerAudioBeep = () => {
+    try {
+      let ctx = audioContextRef.current;
+      if (!ctx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          ctx = new AudioCtx();
+          audioContextRef.current = ctx;
+        }
+      }
+      if (!ctx) return;
+
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      const now = ctx.currentTime;
+      const beepDuration = 0.12; // short crisp burst
+      const gap = 0.08;          // small space between beeps
+      const freq = 1200;         // 1200 Hz urgent alert pitch
+
+      [0, 1, 2].forEach((index) => {
+        const startTime = now + index * (beepDuration + gap);
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'square'; // sharp alert tone
+        osc.frequency.setValueAtTime(freq, startTime);
+
+        gain.gain.setValueAtTime(0.7, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + beepDuration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + beepDuration);
+      });
+
+    } catch (e) {
+      console.warn("Audio Context playback error:", e);
+    }
+  };
+
   const loadComplaints = async () => {
     try {
       const [data, engineersList] = await Promise.all([
         getComplaints(),
         getEngineers().catch(() => []),
       ]);
-      console.log("Raw Complaints from API:", data);
 
       const engMap = {};
       engineersList.forEach((eng) => {
@@ -59,6 +130,27 @@ export const ComplaintProvider = ({ children }) => {
         };
       });
 
+      if (isInitialLoadRef.current) {
+        // Mark all existing complaint IDs as known on initial page load (DO NOT BEEP)
+        formatted.forEach(c => knownComplaintIdsRef.current.add(c.id));
+        isInitialLoadRef.current = false;
+      } else {
+        // Detect genuinely new PENDING complaints that were not known before
+        const newlyAddedPending = formatted.filter(
+          c => !knownComplaintIdsRef.current.has(c.id) && c.status === COMPLAINT_STATUSES.PENDING
+        );
+
+        if (newlyAddedPending.length > 0) {
+          triggerAudioBeep();
+          if (window.onNewIncidentDetected) {
+            window.onNewIncidentDetected(newlyAddedPending[0]);
+          }
+        }
+
+        // Update known IDs set
+        formatted.forEach(c => knownComplaintIdsRef.current.add(c.id));
+      }
+
       setComplaints(formatted);
     } catch (err) {
       console.error(err);
@@ -68,6 +160,8 @@ export const ComplaintProvider = ({ children }) => {
   useEffect(() => {
     if (isAuthenticated) {
       loadComplaints();
+      const interval = setInterval(loadComplaints, 3000);
+      return () => clearInterval(interval);
     }
   }, [isAuthenticated]);
 

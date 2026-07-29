@@ -1,28 +1,8 @@
-# ============================================================
-# 🚀 AAI RUNWAY - PROPER MODEL TRAINING SCRIPT
-# Run this in Google Colab (GPU runtime required)
-# ============================================================
-# 
-# THE PROBLEM: Each Roboflow dataset has its own class IDs (0,1,2...)
-# When you merge them without remapping, class 0 from cracks gets
-# confused with class 0 from FOD, class 0 from airport, etc.
-#
-# THIS SCRIPT: Downloads all datasets, reads each one's class map,
-# builds a unified class map, remaps ALL label files, then trains.
-# ============================================================
-
-# ── STEP 0: Install dependencies ───────────────────────────
-# !pip install roboflow ultralytics -q
-
 from roboflow import Roboflow
 from ultralytics import YOLO
 import os, shutil, yaml, random, glob
 
-# ── STEP 1: Download all datasets ──────────────────────────
-print("="*60)
-print("  STEP 1: DOWNLOADING DATASETS FROM ROBOFLOW")
-print("="*60)
-
+# Download datasets from Roboflow
 rf = Roboflow(api_key="WASiObfwSdzotctxlYxb")
 
 datasets = {
@@ -35,12 +15,7 @@ datasets = {
 
 print("\n✅ All datasets downloaded!\n")
 
-
-# ── STEP 2: Read each dataset's class mapping ─────────────
-print("="*60)
-print("  STEP 2: READING CLASS MAPPINGS FROM EACH DATASET")
-print("="*60)
-
+# Read class mappings from each dataset
 dataset_classes = {}  # { "cracks": {0: "L1_Hole", 1: "L2_Hole", ...}, ... }
 
 for name, ds in datasets.items():
