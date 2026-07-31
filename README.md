@@ -433,11 +433,11 @@ pip install -r requirements.txt
 
 # 5. Create environment file (.env)
 cat <<EOT > .env
-DATABASE_URL=postgresql+asyncpg://postgres:<PASSWORD>@<HOST>:5432/<DB_NAME>
+DATABASE_URL=YOUR_DB_KEY
 JWT_SECRET=your_jwt_secret_key_here
 JWT_ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=2880
-AI_SERVICE_API_KEY=aai-runway-ai-service-key-2026
+AI_SERVICE_API_KEY=YOUR_KEY
 EOT
 
 # 6. Run FastAPI backend server
@@ -465,11 +465,11 @@ pip install -r requirements.txt
 
 :: 5. Create environment file (.env)
 :: Create backend\.env with the following content:
-:: DATABASE_URL=postgresql+asyncpg://postgres:<PASSWORD>@<HOST>:5432/<DB_NAME>
+:: DATABASE_URL=YOUR_DB_KEY
 :: JWT_SECRET=your_jwt_secret_key_here
 :: JWT_ALGORITHM=HS256
 :: ACCESS_TOKEN_EXPIRE_MINUTES=2880
-:: AI_SERVICE_API_KEY=aai-runway-ai-service-key-2026
+:: AI_SERVICE_API_KEY=YOUR_KEY
 
 :: 6. Run FastAPI backend server
 python main.py
@@ -500,7 +500,7 @@ pip install -r requirements.txt
 # 5. Create environment file (.env)
 cat <<EOT > .env
 BACKEND_URL=http://localhost:8000/api/complaints
-AI_SERVICE_API_KEY=aai-runway-ai-service-key-2026
+AI_SERVICE_API_KEY=YOUR_KEY
 CONFIDENCE_THRESHOLD=0.25
 COOLDOWN_SECONDS=10
 CAMERA_NAME=CAM-RWY-B-02
@@ -534,7 +534,7 @@ pip install -r requirements.txt
 :: 5. Create environment file (.env)
 :: Create ai-service\.env with the following content:
 :: BACKEND_URL=http://localhost:8000/api/complaints
-:: AI_SERVICE_API_KEY=aai-runway-ai-service-key-2026
+:: AI_SERVICE_API_KEY=YOUR_KEY
 :: CONFIDENCE_THRESHOLD=0.25
 :: COOLDOWN_SECONDS=10
 :: CAMERA_NAME=CAM-RWY-B-02
