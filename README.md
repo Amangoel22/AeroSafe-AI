@@ -360,6 +360,194 @@ Sensitive values such as database credentials, JWT secrets, and API keys are sto
 
 ---
 
+# 🚀 Quick Start & Setup Guide
+
+Follow the step-by-step instructions below to set up and run the **Frontend**, **Backend**, and **AI Service** on **macOS/Linux** or **Windows**.
+
+---
+
+## 📋 Prerequisites
+
+Before starting, ensure you have the following installed on your system:
+- **Node.js**: `v18.0.0` or higher
+- **Package Manager**: `npm` or `pnpm`
+- **Python**: `v3.9` or higher
+- **Git**
+
+---
+
+## 💻 1. Frontend Setup (`frontend/`)
+
+### 🍎 macOS / Linux
+
+```bash
+# 1. Navigate to the frontend directory
+cd frontend
+
+# 2. Install dependencies
+npm install   # or: pnpm install
+
+# 3. Create environment file (.env)
+echo "VITE_API_URL=http://localhost:8000" > .env
+
+# 4. Start Vite development server
+npm run dev   # or: pnpm dev
+```
+
+### 🪟 Windows
+
+```cmd
+:: 1. Navigate to the frontend directory
+cd frontend
+
+:: 2. Install dependencies
+npm install   :: or: pnpm install
+
+:: 3. Create environment file (.env)
+echo VITE_API_URL=http://localhost:8000 > .env
+
+:: 4. Start Vite development server
+npm run dev
+```
+
+> 💡 **Frontend Server:** Runs by default at `http://localhost:5173`.
+
+---
+
+## ⚙️ 2. Backend Setup (`backend/`)
+
+### 🍎 macOS / Linux
+
+```bash
+# 1. Navigate to backend directory
+cd backend
+
+# 2. Create Python virtual environment
+python3 -m venv venv
+
+# 3. Activate virtual environment
+source venv/bin/activate
+
+# 4. Install dependencies
+pip install -r requirements.txt
+
+# 5. Create environment file (.env)
+cat <<EOT > .env
+DATABASE_URL=postgresql+asyncpg://postgres:<PASSWORD>@<HOST>:5432/<DB_NAME>
+JWT_SECRET=your_jwt_secret_key_here
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=2880
+AI_SERVICE_API_KEY=aai-runway-ai-service-key-2026
+EOT
+
+# 6. Run FastAPI backend server
+python main.py
+# (Alternative: uvicorn main:app --reload --port 8000)
+```
+
+### 🪟 Windows
+
+```cmd
+:: 1. Navigate to backend directory
+cd backend
+
+:: 2. Create Python virtual environment
+python -m venv venv
+
+:: 3. Activate virtual environment
+:: Command Prompt (cmd.exe):
+venv\Scripts\activate
+:: PowerShell:
+:: .\venv\Scripts\Activate.ps1
+
+:: 4. Install dependencies
+pip install -r requirements.txt
+
+:: 5. Create environment file (.env)
+:: Create backend\.env with the following content:
+:: DATABASE_URL=postgresql+asyncpg://postgres:<PASSWORD>@<HOST>:5432/<DB_NAME>
+:: JWT_SECRET=your_jwt_secret_key_here
+:: JWT_ALGORITHM=HS256
+:: ACCESS_TOKEN_EXPIRE_MINUTES=2880
+:: AI_SERVICE_API_KEY=aai-runway-ai-service-key-2026
+
+:: 6. Run FastAPI backend server
+python main.py
+:: (Alternative: uvicorn main:app --reload --port 8000)
+```
+
+> 💡 **Backend Server:** Runs on `http://localhost:8000`. Interactive API Docs are at `http://localhost:8000/docs`.
+
+---
+
+## 🤖 3. AI Service Setup (`ai-service/`)
+
+### 🍎 macOS / Linux
+
+```bash
+# 1. Navigate to AI service directory
+cd ai-service
+
+# 2. Create Python virtual environment
+python3 -m venv venv
+
+# 3. Activate virtual environment
+source venv/bin/activate
+
+# 4. Install dependencies (YOLOv8, OpenCV, PyTorch, etc.)
+pip install -r requirements.txt
+
+# 5. Create environment file (.env)
+cat <<EOT > .env
+BACKEND_URL=http://localhost:8000/api/complaints
+AI_SERVICE_API_KEY=aai-runway-ai-service-key-2026
+CONFIDENCE_THRESHOLD=0.25
+COOLDOWN_SECONDS=10
+CAMERA_NAME=CAM-RWY-B-02
+LOCATION=Runway B
+EOT
+
+# 6. Download model weights (best.pt) into ai-service/ folder
+
+# 7. Run AI detection service
+python detect.py
+```
+
+### 🪟 Windows
+
+```cmd
+:: 1. Navigate to AI service directory
+cd ai-service
+
+:: 2. Create Python virtual environment
+python -m venv venv
+
+:: 3. Activate virtual environment
+:: Command Prompt (cmd.exe):
+venv\Scripts\activate
+:: PowerShell:
+:: .\venv\Scripts\Activate.ps1
+
+:: 4. Install dependencies (YOLOv8, OpenCV, PyTorch, etc.)
+pip install -r requirements.txt
+
+:: 5. Create environment file (.env)
+:: Create ai-service\.env with the following content:
+:: BACKEND_URL=http://localhost:8000/api/complaints
+:: AI_SERVICE_API_KEY=aai-runway-ai-service-key-2026
+:: CONFIDENCE_THRESHOLD=0.25
+:: COOLDOWN_SECONDS=10
+:: CAMERA_NAME=CAM-RWY-B-02
+:: LOCATION=Runway B
+
+:: 6. Download model weights (best.pt) into ai-service/ folder
+
+:: 7. Run AI detection service
+python detect.py
+```
+
+---
+
 # 🔄 Incident State Machine
 
 The core incident workflow can be summarized as:
